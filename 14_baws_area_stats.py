@@ -40,11 +40,17 @@ def get_areas_index(areas, cyano_shp, value=None, not_index=None):
 
 
 if __name__ == "__main__":
+    from bawsvis.paths import data_dir, repo_file
+
     # "POLY_NAMN"
     areas = gp.read_file(
-        r'c:\Arbetsmapp\Shapefiler\Sub-basins_Baltic_Sea\Havsomr_SVAR_2016_3b.shp'
-        # r'C:\Utveckling\w_sharktoolbox\SharkToolbox\data\shapefiles\SVAR 2016_3b_for_statistic_plotting\statistic_areas.shp'
+        repo_file('shape', 'Havsomr_SVAR_2016_3b_CP1252.shp'),
+        encoding='cp1252',
     )
+    if areas.crs is None:
+        # The bundled SVAR shapefile ships without a .prj;
+        # it is natively SWEREF99 TM.
+        areas = areas.set_crs(epsg=3006)
     areas = areas.to_crs(epsg=3006)
     areas_geometries = areas[['BASIN_NR', 'geometry']]
     areas = areas_geometries.dissolve(by='BASIN_NR', as_index=False)
@@ -57,10 +63,7 @@ if __name__ == "__main__":
     areas['area_threshold'] = areas['area'].apply(lambda a: int(a * .8))
     # YEAR = 2002
     for YEAR in range(2004, 2024):
-    # directory = r'C:\Temp\baws_reanalys\tiff_archive'
-        directory = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize' \
-            if YEAR == 2023 else r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years'
-        # directory = r'C:\Temp\baws_reanalys\clipped_archive\corrected_geoms'
+        directory = data_dir('shapeified')
         files = generate_filepaths(directory, pattern=f'cyano_daymap_{YEAR}', endswith='.shp')
         files = list(files)
 
@@ -93,4 +96,5 @@ if __name__ == "__main__":
                         bloom_indices.add(iii)
 
         df['BASIN'] = df.index
-        df.to_excel(f'area_season_bloom_{YEAR}_incl_cloud.xlsx', index=False)
+        df.to_excel(data_dir('stats') / f'area_season_bloom_{YEAR}_incl_cloud.xlsx',
+                    index=False)

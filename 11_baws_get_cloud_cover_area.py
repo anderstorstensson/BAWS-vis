@@ -16,11 +16,13 @@ import os
 
 
 if __name__ == "__main__":
-    # Set path to data directory
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\clouds\prior_years'
+    from bawsvis.paths import data_dir
 
-    # Create the Session object
-    s = Session(data_path=data_path)
+    # Set path to data directory
+    s = Session(data_path=data_dir('clouds'))
+
+    # Stats json files live in the stats directory.
+    s.setting.set_export_directory(path=data_dir('stats'))
 
     for year in range(2002, 2023):
         # Generate filepaths

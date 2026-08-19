@@ -18,8 +18,9 @@ class Settings:
 
     def __init__(self, coordinates_settings='baws1000_sweref99tm'):
         self.base_directory = os.path.dirname(os.path.realpath(__file__))
-        self.export_directory = '\\'.join([self.base_directory, 'export', ''])
-        etc_path = '\\'.join([self.base_directory, 'etc', ''])
+        self.export_directory = os.path.join(self.base_directory, 'export')
+        os.makedirs(self.export_directory, exist_ok=True)
+        etc_path = os.path.join(self.base_directory, 'etc')
         self._load_settings(etc_path)
         self._load_standard_coordinates(etc_path, coordinates_settings)
 
@@ -83,16 +84,11 @@ class Settings:
         :param path:
         :return:
         """
-        if path:
-            if os.path.isdir(path):
-                self.export_directory = path
-            else:
-                raise(FileNotFoundError,
-                      'Could not find the given path: %s\nUsing standard export path (%s) instead'
-                      % (path, self.export_directory))
-        else:
-            raise (FileNotFoundError,
-                   'No path given. Using standard export path (%s) instead' % self.export_directory)
+        if not path:
+            raise ValueError(
+                'No path given. Standard export path is %s' % self.export_directory)
+        os.makedirs(path, exist_ok=True)
+        self.export_directory = str(path)
 
     @staticmethod
     def set_attributes(obj, **kwargs):

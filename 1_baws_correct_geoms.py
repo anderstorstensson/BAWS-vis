@@ -10,24 +10,15 @@ from bawsvis.utils import generate_filepaths
 from bawsvis.session import Session
 from bawsvis.data_handler import correct_shapefile
 from bawsvis.data_handler import ExteriorLog
+from bawsvis.paths import data_dir
 
 
 if __name__ == "__main__":
     # Set path to data directory
-    # data_path = r'C:\Temp\baws_tempo\data_2021'
-    # data_path = r'C:\Temp\baws_reanalys\clipped_archive'
-    # data_path = r'C:\Temp\baws_reanalys\aggragated_archive'
-    # data_path = r'C:\Temp\baws_reanalys\clipped_archive\corrected_geoms'
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test'
-
-    # Create the Session object
-    s = Session(data_path=data_path)
+    s = Session(data_path=data_dir('daymaps'))
 
     # If we want to save data to a specific location, we set the export path here.
-    # s.setting.set_export_directory(path=data_path)
-    s.setting.set_export_directory(path=r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\corrected_geoms')
-    # s.setting.set_export_directory(path=r'C:\Temp\baws_reanalys\clipped_archive\corrected_geoms')
-    # s.setting.set_export_directory(path=r'C:\Temp\baws_reanalys\aggragated_archive\corrected_geoms')
+    s.setting.set_export_directory(path=data_dir('corrected_geoms'))
 
     # Init log. Purpose: save info about multipolygon exterior geometries.
     ExteriorLog()

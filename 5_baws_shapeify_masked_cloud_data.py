@@ -19,16 +19,17 @@ import time
 
 
 if __name__ == "__main__":
-    # rst = rio.open(r'C:\Utveckling\Github\satpy_johannes\raster_template_baws300_sweref99tm.tiff')
+    from bawsvis.paths import data_dir, repo_file
+
     # test_mask2.tiff = landmask?
-    rst = rio.open('test_mask2.tiff')
+    rst = rio.open(repo_file('test_mask2.tiff'))
     mask = rst.read()
     mask = mask[0].astype(int)
 
-    directory = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years'
-    files = generate_filepaths(directory, pattern='cyano_daymap',
+    files = generate_filepaths(data_dir('corrected_geoms'),
+                               pattern='cyano_daymap',
                                endswith='.tiff')
-    export_directory = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\clouds\prior_years'
+    export_directory = data_dir('clouds')
 
     for fid in files:
         print(fid)

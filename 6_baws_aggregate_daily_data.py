@@ -33,27 +33,14 @@ from bawsvis.data_handler import raster_aggregation
 #     s.export_data(data=aggregation, file_name='aggregation_2021.tiff')
 
 if __name__ == "__main__":
+    from bawsvis.paths import data_dir
+
     # Set path to data directory
-    # data_path = r'C:\Temp\baws_reanalys\clipped_archive\corrected_geoms'
-    # data_path = r'C:\Temp\baws_reanalys\2022\corrected_geoms'
-    # orginal
-    # data_path = r'..\data\prod\BAWS\algproduktion\Manuell_algtolkning'
-    # data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test'
-    
-    data_path=r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years'
-    # data_path=r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_prior_years\reanalyzed_data'
-
-    # Create the Session object
-    s = Session(data_path=data_path)
+    s = Session(data_path=data_dir('corrected_geoms'))
 
     # If we want to save data to a specific location,
     # we set the export path here.
-    s.setting.set_export_directory(
-        path=r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years\aggregate')
-        
-    # If we want to save data to a specific location,
-    # we set the export path here.
-    # s.setting.set_export_directory(path=None)
+    s.setting.set_export_directory(path=data_dir('aggregates'))
     # year = 2023
     # for year in range(2002, 2024):
 

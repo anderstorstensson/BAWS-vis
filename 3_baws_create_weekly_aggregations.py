@@ -5,22 +5,14 @@ Created on 2021-09-02 14:57
 from bawsvis.utils import generate_filepaths
 from bawsvis.session import Session
 from bawsvis.data_handler import create_7day_composite
+from bawsvis.paths import data_dir
 
 
 if __name__ == "__main__":
-    # Set path to data directory
-    # data_path = r'C:\Temp\baws_tempo\data_2021'
-    # data_path = r'C:\Temp\baws_reanalys\clipped_archive\corrected_geoms'
-    # Original below
-    # data_path = r'C:\Temp\baws_reanalys\2022\corrected_geoms'
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years'
-
-    # Create the Session object
-    s = Session(data_path=data_path)
-
-    # If we want to save data to a specific location,
-    # we set the export path here.
-    s.setting.set_export_directory(path=data_path)
+    # Set path to data directory.
+    # NOTE: create_7day_composite writes each cyano_weekmap tiff next to
+    # the daily tiffs, i.e. into corrected_geoms/ as well.
+    s = Session(data_path=data_dir('corrected_geoms'))
 
     # Generate filepaths
     generator = generate_filepaths(

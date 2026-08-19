@@ -116,6 +116,9 @@ def generate_filepaths(directory, pattern='', not_pattern='DUMMY_PATTERN',
     :param only_from_dir:
     :return:
     """
+    # Accept both str and pathlib.Path; os.walk yields str roots, so the
+    # path != directory comparison below needs a str directory.
+    directory = os.fspath(directory)
     for path, subdir, fids in os.walk(directory):
         if only_from_dir:
             if path != directory:

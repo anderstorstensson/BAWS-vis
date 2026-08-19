@@ -20,13 +20,12 @@ if __name__ == "__main__":
     - Therefore we need to create new cyano_daymap.shp files from cyano_daymap.tiff
     - Place these data in some temporary folder.
     """
-    # TODO Generate stats_all.json from data in C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_prior_years\reanalyzed_data
-    for year in range(2002, 2024):
-      # year = [] # 2002-2022 (2023?)
+    from bawsvis.paths import data_dir
 
-      # for loop
-      file_path_1 = rf'C:\Kodning\BAWS-vis\bawsvis\export\stats_{year}_2.json'
-      file_path_2 = r'C:\Kodning\BAWS-vis\bawsvis\export\stats_all.json'
+    stats_dir = data_dir('stats')
+    for year in range(2002, 2024):
+      file_path_1 = str(stats_dir / f'stats_{year}_2.json')
+      file_path_2 = str(stats_dir / 'stats_all.json')
 
       data = json_reader(file_path_1)
       data_2 = json_reader(file_path_2)

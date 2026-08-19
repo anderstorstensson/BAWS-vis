@@ -15,15 +15,12 @@ import numpy as np
 
 if __name__ == "__main__":
 
+    from bawsvis.paths import data_dir
+
     s = Session()
 
     year = 2023
-    # for year in range(2023):
-    # file = r'C:\Temp\baws_tempo\data_2021\aggregation_2021.tiff'
-    # original
-    # file = r'C:\Temp\baws_reanalys\aggragated_archive\2002-2022_aggregation.txt'
-    # file = fr'C:\Temp\baws_reanalys\aggragated_archive\aggregation_{year}.tiff'
-    file = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years\aggregate\aggregation_2002-2023.txt'
+    file = data_dir('aggregates') / f'aggregation_2002-{year}.txt'
 
     # data, meta = raster_reader(file, include_meta=True)
     data = np.loadtxt(file)
@@ -50,7 +47,7 @@ if __name__ == "__main__":
     plot._draw_map()
     plot._draw_mesh(p_color=True)
     plot.hide_axis()
-    plot._save_figure(os.path.join(s.setting.export_directory, f'aggregation_2002-{year}.png'))
+    plot._save_figure(os.path.join(data_dir('figures'), f'aggregation_2002-{year}.png'))
 
         # break
 

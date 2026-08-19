@@ -7,9 +7,10 @@ Created on 2021-10-18 18:42
 import os
 import pandas as pd
 import numpy as np
+from bawsvis.paths import data_dir, repo_file
 
 
-fid = r'C:\Kodning\BAWS-vis\area_season_bloom_all.xlsx'
+fid = repo_file('area_season_bloom_all.xlsx')
 
 stats = None
 for year in range(2002, 2024):
@@ -84,6 +85,6 @@ for b in basins:
 
 final = pd.DataFrame(mean_median)
 final.to_excel(
-    f'area_season_bloom_mean_median_{year}.xlsx',
+    data_dir('stats') / f'area_season_bloom_mean_median_{year}.xlsx',
     index=False
 )

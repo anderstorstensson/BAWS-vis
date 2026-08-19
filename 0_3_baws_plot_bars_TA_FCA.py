@@ -27,8 +27,10 @@ def change_width(ax, new_value):
 
 
 if __name__ == "__main__":
+    from bawsvis.paths import repo_file
+
     df = pd.read_excel(
-        r'C:\Kodning\BAWS-vis\annual_stats_norm_new_2.xlsx',
+        repo_file('annual_stats_norm_new_2.xlsx'),
         sheet_name='data',
     )
     df_monthly = pd.DataFrame({

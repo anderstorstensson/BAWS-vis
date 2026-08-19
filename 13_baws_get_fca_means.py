@@ -22,7 +22,11 @@ MONTH_MAP = {
 
 
 if __name__ == "__main__":
+    from bawsvis.paths import data_dir
+
     s = Session()
+    # Stats json files live in the stats directory.
+    s.setting.set_export_directory(path=data_dir('stats'))
 
     for year in range(2002, 2023):
         stat = json_reader(os.path.join(s.setting.export_directory, f'stats_{year}_2.json'))

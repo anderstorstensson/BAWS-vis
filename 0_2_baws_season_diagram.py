@@ -25,7 +25,9 @@ sns.set(style="whitegrid")
 
 
 def plot_one_season(stat_df):
-    file = r'C:\Kodning\BAWS-vis\bawsvis\export\stats_2023_2.json'
+    from bawsvis.paths import data_dir
+
+    file = data_dir('stats') / 'stats_2023_2.json'
     data = pd.read_json(file)
     data.rename(columns={c: pd.Timestamp(str(c)) for c in data.columns},
                 inplace=True)
@@ -145,7 +147,9 @@ if __name__ == "__main__":
     - Place these data in some temporary folder, do not overwrite the master-data.
     """
 
-    file_path = r'C:\Kodning\BAWS-vis\bawsvis\export\stats_all.json'
+    from bawsvis.paths import data_dir
+
+    file_path = str(data_dir('stats') / 'stats_all.json')
     stat_data = get_statistics(file_path)
     df = pd.DataFrame(stat_data)
     idx = df['summer_dates'].values

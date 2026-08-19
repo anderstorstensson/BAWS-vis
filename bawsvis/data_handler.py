@@ -144,6 +144,10 @@ def get_shapes_from_raster(raster, exclude_values=None):
     exclude_values = exclude_values or [0, 4]
     shapes_with_properties = []
 
+    # rasterio.features.shapes does not accept 64-bit integers; plain
+    # .astype(int) gives int64 on Linux (but int32 on Windows).
+    raster = np.asarray(raster).astype(np.int32)
+
     crs, transform, area_shape = area2transform_baws1000_sweref99tm()
 
     classes = {int(cls): {'class': int(cls)} for cls in np.unique(raster)}
@@ -665,6 +669,14 @@ def correct_shapefile(fid, export_path=None):
 
     crs = rio.crs.CRS.from_string("epsg:3006")
     schema = {'properties': [('class', 'int')], 'geometry': 'Polygon'}
+
+    # Keep only the 'class' attribute; source files (e.g. from the SMHI
+    # open-data WFS) may carry extra fields not in the schema above.
+    shapes = [
+        {'geometry': s['geometry'],
+         'properties': {'class': int(s['properties']['class'])}}
+        for s in shapes
+    ]
 
     out_path = os.path.join(export_path, os.path.basename(fid))
     with fiona.open(out_path, 'w',

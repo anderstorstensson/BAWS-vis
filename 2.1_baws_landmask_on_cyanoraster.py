@@ -22,10 +22,13 @@ def raster_reader(fid, include_meta=False):
 
 
 if __name__ == "__main__":
-    mask, meta = raster_reader(r'C:\Kodning\BAWS-vis\raster_landmask_baws1000_sweref99tm.tiff', include_meta=True)
+    from bawsvis.paths import data_dir, repo_file
+
+    mask, meta = raster_reader(
+        repo_file('raster_landmask_baws1000_sweref99tm.tiff'), include_meta=True)
 
     files = generate_filepaths(
-        r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years',
+        data_dir('corrected_geoms'),
         pattern='cyano_daymap',
         endswith='.tiff',
     )

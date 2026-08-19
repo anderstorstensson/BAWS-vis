@@ -16,11 +16,14 @@ import os
 
 
 if __name__ == "__main__":
-    # Set path to data directory
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years'
+    from bawsvis.paths import data_dir
 
-    # Create the Session object
+    # Set path to data directory (shapefiles regenerated from rasters, script 4)
+    data_path = data_dir('shapeified')
     s = Session(data_path=data_path)
+
+    # Stats json files live in the stats directory.
+    s.setting.set_export_directory(path=data_dir('stats'))
 
     for year in range(2002, 2023):
         files = generate_filepaths(data_path, pattern=f'cyano_daymap_{year}',

@@ -12,21 +12,19 @@ from bawsvis.data_handler import get_daily_stats, get_weekly_stats
 
 
 if __name__ == "__main__":
-    # Set path to data directory
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years'
-    # data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_prior_years\reanalyzed_data'
+    from bawsvis.paths import data_dir
 
-    # Create the Session object
-    s = Session(data_path=data_path)
+    # Set path to data directory (shapefiles regenerated from rasters, script 4)
+    s = Session(data_path=data_dir('shapeified'))
 
     # If we want to save data to a specific location, we set the export path here.
-    # s.setting.set_export_directory(path=None)
+    s.setting.set_export_directory(path=data_dir('stats'))
 
     # year = 2023
     for year in range(2002, 2023):
 
         # Generate filepaths (daily)
-        generator = generate_filepaths(s.setting.export_directory, 
+        generator = generate_filepaths(s.data_path,
                                     pattern=f'cyano_daymap_{year}',
                                     endswith='.shp')
 

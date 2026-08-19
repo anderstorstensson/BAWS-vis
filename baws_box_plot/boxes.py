@@ -153,8 +153,13 @@ def get_list_of_dataframes(df, only_red=False, only_yellow=False, only_cloud=Fal
 
 
 if __name__ == "__main__":
+    from pathlib import Path
+    from bawsvis.paths import data_dir
+
+    season_bloom_file = Path(__file__).resolve().parent / 'area_season_bloom_all_test.xlsx'
+
     stats_df = pd.read_excel(
-        r'C:\Kodning\baws_box_plot\area_season_bloom_all_test.xlsx',
+        season_bloom_file,
         sheet_name=f'stats_2002-{YEAR}',
         dtype=str,
     )
@@ -179,7 +184,7 @@ if __name__ == "__main__":
     stats_df[date_keys] = stats_df[date_keys].apply(mdates.date2num)
 
     df = pd.read_excel(
-        r'C:\Kodning\baws_box_plot\area_season_bloom_all_test.xlsx',
+        season_bloom_file,
         sheet_name=f'{YEAR}',
         dtype=str,
     )
@@ -319,5 +324,7 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'area_season_bloom_diagram_with_clouds_80percent_{YEAR}_new_colours.png', dpi=600)
+    plt.savefig(
+        data_dir('figures') / f'area_season_bloom_diagram_with_clouds_80percent_{YEAR}_new_colours.png',
+        dpi=600)
 

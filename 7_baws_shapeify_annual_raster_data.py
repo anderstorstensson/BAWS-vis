@@ -12,11 +12,13 @@ from bawsvis.data_handler import shapeify_annual
 
 
 if __name__ == "__main__":
+    from bawsvis.paths import data_dir
+
     # Create the Session object
     s = Session()
 
     # Set path to data path
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\aggregate_archive'
+    data_path = data_dir('aggregates')
 
     generator = generate_filepaths(s.data_path, pattern='aggregation', endswith='.tiff')
 
