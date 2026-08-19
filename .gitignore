@@ -4,3 +4,4 @@ export/*
 *.pyc
 .idea
 *.pickle
+.venv/
