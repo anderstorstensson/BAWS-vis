@@ -1,0 +1,30 @@
+[project]
+name = "bawsvis"
+version = "0.1.0"
+description = "Post-season processing and visualization for SMHI BAWS cyanobacteria data"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy~=1.26.4",
+    "pandas~=2.2.1",
+    "fiona~=1.9.6",
+    "rasterio~=1.3.9",
+    "geopandas~=0.14.3",
+    "shapely~=2.0.3",
+    "seaborn~=0.13.2",
+    "basemap~=1.4.1",
+    "basemap-data-hires~=1.3.2",
+    "cmocean~=3.1.3",
+    "descartes~=1.1.0",
+    "scipy~=1.12.0",
+    "openpyxl~=3.1.2",
+    "ipykernel~=6.29.3",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["bawsvis"]
