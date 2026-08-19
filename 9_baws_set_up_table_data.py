@@ -20,8 +20,10 @@ if __name__ == "__main__":
     # If we want to save data to a specific location, we set the export path here.
     s.setting.set_export_directory(path=data_dir('stats'))
 
-    # year = 2023
-    for year in range(2002, 2023):
+    from bawsvis.utils import discover_years
+
+    for year in discover_years(s.data_path, pattern='cyano_daymap_',
+                               endswith='.shp'):
 
         # Generate filepaths (daily)
         generator = generate_filepaths(s.data_path,

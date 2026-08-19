@@ -20,15 +20,19 @@ if __name__ == "__main__":
     - Therefore we need to create new cyano_daymap.shp files from cyano_daymap.tiff
     - Place these data in some temporary folder.
     """
+    import os
     from bawsvis.paths import data_dir
+    from bawsvis.utils import discover_years
 
     stats_dir = data_dir('stats')
-    for year in range(2002, 2024):
+    for year in discover_years(stats_dir, pattern='stats_',
+                               endswith='_2.json'):
       file_path_1 = str(stats_dir / f'stats_{year}_2.json')
       file_path_2 = str(stats_dir / 'stats_all.json')
 
       data = json_reader(file_path_1)
-      data_2 = json_reader(file_path_2)
+      # stats_all.json does not exist on the first run; start from empty.
+      data_2 = json_reader(file_path_2) if os.path.exists(file_path_2) else {}
 
       data_2 = recursive_dict_update(data_2, data)
 

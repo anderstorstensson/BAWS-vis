@@ -7,6 +7,7 @@ Created on 2020-08-28 10:50
 
 """
 import os
+import re
 import numpy as np
 import rasterio as rio
 from collections.abc import Mapping
@@ -132,6 +133,23 @@ def generate_filepaths(directory, pattern='', not_pattern='DUMMY_PATTERN',
                             yield os.path.abspath(os.path.join(path, f))
                 else:
                     yield os.path.abspath(os.path.join(path, f))
+
+
+def discover_years(directory, pattern='', endswith=''):
+    """Return a sorted list of years found in matching file names.
+
+    Scans `directory` for files matching `pattern`/`endswith` (same
+    semantics as generate_filepaths) and extracts the first four-digit
+    year (20xx) from each file name. Lets pipeline scripts loop over the
+    years actually present in the data instead of hardcoded ranges.
+    """
+    years = set()
+    for fid in generate_filepaths(directory, pattern=pattern,
+                                  endswith=endswith):
+        match = re.search(r'(20\d{2})', os.path.basename(fid))
+        if match:
+            years.add(int(match.group(1)))
+    return sorted(years)
 
 
 def recursive_dict_update(d, u):

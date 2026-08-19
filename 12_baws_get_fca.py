@@ -25,11 +25,18 @@ if __name__ == "__main__":
     # Stats json files live in the stats directory.
     s.setting.set_export_directory(path=data_dir('stats'))
 
-    for year in range(2002, 2023):
+    from bawsvis.utils import discover_years
+
+    for year in discover_years(data_path, pattern='cyano_daymap_',
+                               endswith='.shp'):
         files = generate_filepaths(data_path, pattern=f'cyano_daymap_{year}',
                                 endswith='.shp')
-        stat = json_reader(os.path.join(
-            s.setting.export_directory, f'stats_{year}_2.json'))
+        stat_path = os.path.join(
+            s.setting.export_directory, f'stats_{year}_2.json')
+        if not os.path.exists(stat_path):
+            print(f'Skipping {year}: {stat_path} not found (run scripts 10-11 first)')
+            continue
+        stat = json_reader(stat_path)
 
         for fid in files:
             print(fid)

@@ -28,11 +28,9 @@ if __name__ == "__main__":
         'intensity': [],
     }
     
-    year = 2023
-    # for year in range(2002, 2023):
-
-    # Generate filepaths
-    generator = generate_filepaths(s.data_path, endswith=f'{year}.shp')
+    # Generate filepaths: one annual aggregation shapefile per year present.
+    generator = generate_filepaths(s.data_path, pattern='aggregation_',
+                                   endswith='.shp')
 
     for fid in generator:
         print(fid)
@@ -63,8 +61,12 @@ if __name__ == "__main__":
         stats['intensity'].append(int(round(I, 0)))
 
     df_stats = pd.DataFrame(stats)
+    if df_stats.empty:
+        raise SystemExit(f'No aggregation_<year>.shp files found in {s.data_path}')
+    df_stats = df_stats.sort_values('year').reset_index(drop=True)
     df_stats.to_excel(
-        data_dir('stats') / f'annual_stats_norm_{year}.xlsx',
+        data_dir('stats')
+        / f"annual_stats_norm_{df_stats['year'].iloc[0]}-{df_stats['year'].iloc[-1]}.xlsx",
         sheet_name='data',
         index=None,
     )

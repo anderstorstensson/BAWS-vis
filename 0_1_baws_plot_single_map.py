@@ -19,8 +19,11 @@ if __name__ == "__main__":
 
     s = Session()
 
-    year = 2023
-    file = data_dir('aggregates') / f'aggregation_2002-{year}.txt'
+    # Use the most recent all-years aggregation matrix from script 6.
+    candidates = sorted(data_dir('aggregates').glob('aggregation_*.txt'))
+    if not candidates:
+        raise SystemExit('No aggregation_*.txt found; run script 6 first')
+    file = candidates[-1]
 
     # data, meta = raster_reader(file, include_meta=True)
     data = np.loadtxt(file)
@@ -47,7 +50,7 @@ if __name__ == "__main__":
     plot._draw_map()
     plot._draw_mesh(p_color=True)
     plot.hide_axis()
-    plot._save_figure(os.path.join(data_dir('figures'), f'aggregation_2002-{year}.png'))
+    plot._save_figure(os.path.join(data_dir('figures'), file.stem + '.png'))
 
         # break
 
