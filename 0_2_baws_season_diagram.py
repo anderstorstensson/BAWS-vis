@@ -24,10 +24,14 @@ from matplotlib import dates
 sns.set(style="whitegrid")
 
 
-def plot_one_season(stat_df):
+def plot_one_season(stat_df, year, span):
     from bawsvis.paths import data_dir
 
-    file = data_dir('stats') / 'stats_2023_2.json'
+    # The climatology from get_statistics is indexed on dummy-year dates;
+    # shift it to the plotted season year so both panels share one axis.
+    stat_df = stat_df.rename(columns=lambda ts: ts.replace(year=int(year)))
+
+    file = data_dir('stats') / f'stats_{year}_2.json'
     data = pd.read_json(file)
     data.rename(columns={c: pd.Timestamp(str(c)) for c in data.columns},
                 inplace=True)
@@ -88,14 +92,14 @@ def plot_one_season(stat_df):
                  ax=ax3)
 
     sns.lineplot(data=stat_df.loc['weekly_mean', :],
-                 label='Medel - Veckodata 2002-2023',
+                 label=f'Medel - Veckodata {span}',
                  color='#046666',
                  ax=ax2)
 
     ax2.fill_between(stat_df.columns,
                      stat_df.loc['weekly_std_u', :],
                      y2=stat_df.loc['weekly_std_l', :],
-                     label='SD - Veckodata 2002-2023',
+                     label=f'SD - Veckodata {span}',
                      lw=.1, alpha=.6,
                      color='#9B9B9B')
 
@@ -131,8 +135,7 @@ def plot_one_season(stat_df):
     # ax1.set_title('Cyanobacterial bloom 2021')
 
     plt.tight_layout()
-    plt.show()
-    # plt.savefig(r'C:\Kodning\BAWS-vis\bawsvis\export\diagram_2023_new_colours.png', dpi=600)
+    plt.savefig(data_dir('figures') / f'diagram_{year}.png', dpi=600)
 
 
 if __name__ == "__main__":
@@ -148,6 +151,12 @@ if __name__ == "__main__":
     """
 
     from bawsvis.paths import data_dir
+    from bawsvis.utils import discover_years
+
+    years = discover_years(data_dir('stats'), pattern='stats_',
+                           endswith='_2.json')
+    if not years:
+        raise SystemExit('No stats_<year>_2.json found; run scripts 9-12 first')
 
     file_path = str(data_dir('stats') / 'stats_all.json')
     stat_data = get_statistics(file_path)
@@ -159,7 +168,7 @@ if __name__ == "__main__":
 
     df = get_interpolated_statistics_table(df)
 
-    plot_one_season(df)
+    plot_one_season(df, years[-1], f'{years[0]}-{years[-1]}')
 
     # fig, ax = plt.subplots(figsize=(10, 5))
     #

@@ -27,12 +27,16 @@ def change_width(ax, new_value):
 
 
 if __name__ == "__main__":
-    from bawsvis.paths import repo_file
+    from bawsvis.paths import data_dir
 
-    df = pd.read_excel(
-        repo_file('annual_stats_norm_new_2.xlsx'),
-        sheet_name='data',
-    )
+    # Combine the pipeline's annual stats (script 8) with the FCA means
+    # (script 13); the old committed workbook had both in one sheet.
+    annual_files = sorted(data_dir('stats').glob('annual_stats_norm_*.xlsx'))
+    if not annual_files:
+        raise SystemExit('No annual_stats_norm_*.xlsx found; run script 8 first')
+    df = pd.read_excel(annual_files[-1], sheet_name='data')
+    fca = pd.read_excel(data_dir('stats') / 'fca_means.xlsx', sheet_name='data')
+    df = df.merge(fca, on='year')
     df_monthly = pd.DataFrame({
         'year': df['year'].to_list() * 3,
         'fca': df['june'].to_list() + df['july'].to_list() + df['august'].to_list(),
@@ -81,6 +85,8 @@ if __name__ == "__main__":
 
     plt.xticks(rotation=45)
     plt.tight_layout()
-    
-    plt.show()
-    # plt.savefig('TA_FCA_2023_new_colours.png', dpi=600)
+
+    plt.savefig(
+        data_dir('figures')
+        / f"TA_FCA_{df['year'].iloc[0]}-{df['year'].iloc[-1]}.png",
+        dpi=600)
