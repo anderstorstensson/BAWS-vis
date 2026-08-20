@@ -31,7 +31,6 @@ from urllib.request import Request, urlopen
 WFS_URL = "https://opendata-view.smhi.se/algae/SR.SeaSurfaceArea/wfs"
 TYPE_NAME = "algae:SR.SeaSurfaceArea"
 USER_AGENT = "BAWS-vis fetch_wfs_daymaps"
-ARCHIVE_START_YEAR = 2002
 
 
 def build_url(day, result_type=None):
@@ -108,17 +107,13 @@ def season_days(year, start_monthday, end_monthday):
 
 
 def parse_years(tokens):
-    years = set()
-    for token in tokens:
-        if "-" in token:
-            first, last = token.split("-", 1)
-            years.update(range(int(first), int(last) + 1))
-        else:
-            years.add(int(token))
-    bad = [y for y in years if y < ARCHIVE_START_YEAR or y > date.today().year]
-    if bad:
-        raise SystemExit(f"Years outside archive ({ARCHIVE_START_YEAR}-today): {sorted(bad)}")
-    return sorted(years)
+    """Sorted years from CLI tokens like ["2023", "2002-2005"]."""
+    from bawsvis.selection import parse_years as parse_year_selection
+    try:
+        years = parse_year_selection(" ".join(tokens))
+    except ValueError as error:
+        raise SystemExit(f"--years: {error}") from None
+    return sorted(years or ())
 
 
 def parse_monthday(text):

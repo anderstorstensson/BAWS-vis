@@ -24,7 +24,7 @@ if __name__ == "__main__":
     from bawsvis.utils import discover_years
 
     for year in discover_years(s.data_path, pattern='cyano_daymap_',
-                               endswith='.shp'):
+                               endswith='.shp', selected=True):
 
         # Generate filepaths
         generator = generate_filepaths(s.data_path,

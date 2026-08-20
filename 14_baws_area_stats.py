@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
     directory = data_dir('shapeified')
     for YEAR in discover_years(directory, pattern='cyano_daymap_',
-                               endswith='.shp'):
+                               endswith='.shp', selected=True):
         files = generate_filepaths(directory, pattern=f'cyano_daymap_{YEAR}', endswith='.shp')
         files = list(files)
 

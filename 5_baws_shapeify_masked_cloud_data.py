@@ -8,6 +8,7 @@ Created on 2021-11-04 20:35
 """
 import os
 from bawsvis.utils import generate_filepaths
+from bawsvis.selection import only_selected
 from bawsvis.data_handler import shapeify_clouds
 import geopandas as gp
 import rasterio as rio
@@ -26,9 +27,9 @@ if __name__ == "__main__":
     mask = rst.read()
     mask = mask[0].astype(int)
 
-    files = generate_filepaths(data_dir('corrected_geoms'),
-                               pattern='cyano_daymap',
-                               endswith='.tiff')
+    files = only_selected(generate_filepaths(data_dir('corrected_geoms'),
+                                             pattern='cyano_daymap',
+                                             endswith='.tiff'))
     export_directory = data_dir('clouds')
 
     for fid in files:

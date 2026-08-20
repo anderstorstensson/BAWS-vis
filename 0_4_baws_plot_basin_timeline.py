@@ -129,6 +129,7 @@ def get_list_of_dataframes(df, only_red=False, only_yellow=False, only_cloud=Fal
 if __name__ == "__main__":
     import re
     from bawsvis.paths import data_dir
+    from bawsvis.selection import plot_year
 
     # Combined workbook from script 16: area_season_bloom_all_<first>-<last>.xlsx
     candidates = sorted(data_dir('stats').glob('area_season_bloom_all_*.xlsx'))
@@ -136,7 +137,9 @@ if __name__ == "__main__":
         raise SystemExit('No area_season_bloom_all_*.xlsx found; run script 16 first')
     season_bloom_file = candidates[-1]
     span = re.search(r'(\d{4}-\d{4})', season_bloom_file.stem).group(1)
-    YEAR = int(span.split('-')[1])
+    # One sheet per season in the workbook; draw BAWS_PLOT_YEAR or the latest.
+    sheets = pd.ExcelFile(season_bloom_file).sheet_names
+    YEAR = plot_year(int(name) for name in sheets if name.isdigit())
 
     stats_df = pd.read_excel(
         season_bloom_file,

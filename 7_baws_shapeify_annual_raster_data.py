@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # Loop through the years present and shapeify each annual aggregate.
     for year in discover_years(data_path, pattern='aggregation_',
-                               endswith='.tiff'):
+                               endswith='.tiff', selected=True):
         rst_path = os.path.join(data_path, f'aggregation_{year}.tiff')
         shapeify_annual(rst_path, export_path=s.setting.export_directory)
 

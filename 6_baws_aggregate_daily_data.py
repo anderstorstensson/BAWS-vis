@@ -42,9 +42,13 @@ if __name__ == "__main__":
     # we set the export path here.
     s.setting.set_export_directory(path=data_dir('aggregates'))
 
+    # All seasons on disk (for the all-years matrix) and the requested
+    # subset (BAWS_YEARS) for the per-season tiffs.
+    all_years = discover_years(s.data_path, pattern='cyano_daymap',
+                               endswith='.tiff')
     years = discover_years(s.data_path, pattern='cyano_daymap',
-                           endswith='.tiff')
-    if not years:
+                           endswith='.tiff', selected=True)
+    if not all_years:
         raise SystemExit(f'No cyano_daymap tiffs found in {s.data_path}')
 
     # Annual aggregates (one tiff per year, used by scripts 7-8).
@@ -61,13 +65,14 @@ if __name__ == "__main__":
             file_name=f'aggregation_{year}.tiff'
         )
 
-    # All-years aggregate (text matrix, used by plot script 0_1).
+    # All-years aggregate (text matrix, used by plot script 0_1). Always
+    # built from every season on disk, regardless of BAWS_YEARS.
     generator = generate_filepaths(s.data_path, pattern='cyano_daymap',
                                    endswith='.tiff')
     aggregation = raster_aggregation(generator, only_surface=False)
     s.export_data(
         data=aggregation,
-        file_name=f'aggregation_{years[0]}-{years[-1]}.txt',
+        file_name=f'aggregation_{all_years[0]}-{all_years[-1]}.txt',
         writer='text'
     )
 

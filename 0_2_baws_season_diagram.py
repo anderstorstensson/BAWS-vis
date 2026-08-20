@@ -152,11 +152,15 @@ if __name__ == "__main__":
 
     from bawsvis.paths import data_dir
     from bawsvis.utils import discover_years
+    from bawsvis.selection import plot_year
 
+    # Climatology spans every season on disk; the panel shows one season
+    # (BAWS_PLOT_YEAR, default the latest).
     years = discover_years(data_dir('stats'), pattern='stats_',
                            endswith='_2.json')
     if not years:
         raise SystemExit('No stats_<year>_2.json found; run scripts 9-12 first')
+    year = plot_year(years)
 
     file_path = str(data_dir('stats') / 'stats_all.json')
     stat_data = get_statistics(file_path)
@@ -168,7 +172,7 @@ if __name__ == "__main__":
 
     df = get_interpolated_statistics_table(df)
 
-    plot_one_season(df, years[-1], f'{years[0]}-{years[-1]}')
+    plot_one_season(df, year, f'{years[0]}-{years[-1]}')
 
     # fig, ax = plt.subplots(figsize=(10, 5))
     #
