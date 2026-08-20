@@ -355,7 +355,11 @@ def raster_aggregation(file_generator, mask=None, only_surface=False, reader='ra
     :param only_surface:
     :return:
     """
-    arrays = []
+    # Keep a running sum instead of collecting every scene: a full
+    # multi-decade run is thousands of scenes and holding them all
+    # in memory (~16 MB each) exhausts RAM and gets the process
+    # OOM-killed.
+    agg_array = None
     zeros = np.array(())
     for fid in file_generator:
         print(fid)
@@ -377,15 +381,10 @@ def raster_aggregation(file_generator, mask=None, only_surface=False, reader='ra
         else:
             array = np.where(np.logical_or(array == 2, array == 3), 1, zeros)
 
-        arrays.append(array)
-
-    # Two loops? in case we want to lift out the part below..
-    agg_array = arrays[0]
-    if len(arrays) == 1:
-        pass
-    else:
-        for scene in arrays[1:]:
-            agg_array += scene
+        if agg_array is None:
+            agg_array = array
+        else:
+            agg_array += array
 
     return agg_array
 
