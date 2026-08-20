@@ -16,6 +16,21 @@ from matplotlib.patches import Polygon
 import cmocean
 import numpy as np
 
+from bawsvis.paths import data_dir
+
+
+def gshhs_coastline_path():
+    """High-resolution GSHHS land polygons used to mask land in maps."""
+    path = data_dir('shape') / 'GSHHS_h_L1.shp'
+    if not path.exists():
+        raise FileNotFoundError(
+            f'Missing coastline shapefile: {path}\n'
+            'Download gshhg-shp from '
+            'https://www.soest.hawaii.edu/pwessel/gshhg/ and place '
+            'GSHHS_shp/h/GSHHS_h_L1.* there.'
+        )
+    return path
+
 
 class PlotMap:
     """
@@ -315,7 +330,11 @@ class PlotWhiteMap:
                            ax=self.map_axes)
 
         import geopandas as gp
-        gf = gp.read_file(r'c:\Arbetsmapp\Shapefiler\GSHHS_h_L1.shp')
+        gf = gp.read_file(gshhs_coastline_path())
+        # Only land polygons touching the map frame matter; the global
+        # dataset has ~180k polygons and drawing them all takes forever.
+        gf = gf.cx[self.map_frame['lon_min'] - 2:self.map_frame['lon_max'] + 2,
+                   self.map_frame['lat_min'] - 2:self.map_frame['lat_max'] + 2]
         for geom in gf.geometry:
             x, y = self.map(geom.exterior.coords.xy[0], geom.exterior.coords.xy[1])
             poly = Polygon(
@@ -657,7 +676,7 @@ class PlotBasinPatchesMap:
                 self.map_axes.add_patch(poly)
 
         self.map.drawmapboundary(fill_color='#DEFEFF')
-        gf = gp.read_file(r'c:\Arbetsmapp\Shapefiler\GSHHS_h_L1.shp')
+        gf = gp.read_file(gshhs_coastline_path())
         for i, row_geom in gf.iterrows():
             if row_geom['class'] == 4:
                 continue

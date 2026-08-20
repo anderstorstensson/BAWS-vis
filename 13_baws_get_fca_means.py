@@ -22,22 +22,32 @@ MONTH_MAP = {
 
 
 if __name__ == "__main__":
+    from bawsvis.paths import data_dir
+
     s = Session()
+    # Stats json files live in the stats directory.
+    s.setting.set_export_directory(path=data_dir('stats'))
 
-    for year in range(2002, 2023):
-        stat = json_reader(os.path.join(s.setting.export_directory, f'stats_{year}_2.json'))
+    from bawsvis.utils import discover_years
 
-        # dummy_year = 2022
+    season = {
+        'median_period': [],
+        'june': [],
+        'july': [],
+        'august': [],
+    }
+    # Accumulate over ALL years before exporting (a previous version
+    # rebuilt these dicts inside the loop and only exported the last year).
+    annual_data = {}
+
+    for year in discover_years(s.setting.export_directory,
+                               pattern='stats_', endswith='_2.json'):
+        stat = json_reader(os.path.join(
+            s.setting.export_directory, f'stats_{year}_2.json'))
+
         start = pd.Timestamp(f'{year}-06-20')  # median start 2002-2022
         end = pd.Timestamp(f'{year}-09-01')  # median end 2002-2022
 
-        annual_data = {}
-        season = {
-            'median_period': [],
-            'june': [],
-            'july': [],
-            'august': [],
-        }
         for date, item in stat.items():
             ts = pd.Timestamp(date)
             if ts.year not in annual_data:
@@ -49,13 +59,14 @@ if __name__ == "__main__":
             if ts.month in MONTH_MAP:
                 annual_data[ts.year][MONTH_MAP.get(ts.month)].append(item.get('fca'))
 
-        out_dict = {k: [] for k in ('year', 'median_period', 'june', 'july', 'august')}
-        for key in annual_data:
-            for period in season:
-                value = np.nanmean(annual_data[key][period])
-                annual_data[key][period] = value
-                out_dict[period].append(round(value, 5))
-            out_dict['year'].append(key)
+    out_dict = {k: [] for k in ('year', 'median_period', 'june', 'july', 'august')}
+    for key in sorted(annual_data):
+        for period in season:
+            values = [v for v in annual_data[key][period] if v is not None]
+            value = np.nanmean(values) if values else np.nan
+            annual_data[key][period] = value
+            out_dict[period].append(round(value, 5))
+        out_dict['year'].append(key)
 
     out_file_path = os.path.join(
         s.setting.export_directory, f'fca_means.json')

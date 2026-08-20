@@ -12,23 +12,22 @@ from bawsvis.data_handler import shapeify_annual
 
 
 if __name__ == "__main__":
+    from bawsvis.paths import data_dir
+    from bawsvis.utils import discover_years
+
     # Create the Session object
     s = Session()
 
     # Set path to data path
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\aggregate_archive'
-
-    generator = generate_filepaths(s.data_path, pattern='aggregation', endswith='.tiff')
+    data_path = data_dir('aggregates')
 
     # If we want to save data to a specific location, we set the export path here.
     s.setting.set_export_directory(path=data_path)
 
-    # Loop through the file-generator and shapeify raster data.
-    # year = 2023
-    for year in range(2002, 2023):
-    
-        # Annual aggregate
-        rst_path = os.path.join(data_path, fr'aggregation_{year}.tiff')
+    # Loop through the years present and shapeify each annual aggregate.
+    for year in discover_years(data_path, pattern='aggregation_',
+                               endswith='.tiff'):
+        rst_path = os.path.join(data_path, f'aggregation_{year}.tiff')
         shapeify_annual(rst_path, export_path=s.setting.export_directory)
 
         # # Monthly aggregate

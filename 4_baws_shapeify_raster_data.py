@@ -9,23 +9,15 @@ Created on 2020-09-01 08:45
 from bawsvis.utils import generate_filepaths
 from bawsvis.session import Session
 from bawsvis.data_handler import shapeify, shapeify_weekly
+from bawsvis.paths import data_dir
 
 
 if __name__ == "__main__":
     # Set path to data directory
-    # Original below
-    # data_path = r'C:\Temp\baws_reanalys\clipped_archive\corrected_geoms'
-    # data_path = r'C:\Temp\baws_reanalys\2022\corrected_geoms'
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years'
-
-    # Create the Session object
-    s = Session(data_path=data_path)
+    s = Session(data_path=data_dir('corrected_geoms'))
 
     # If we want to save data to a specific location, we set the export path here.
-    s.setting.set_export_directory(
-        # path=r'C:\Temp\baws_reanalys\2022\corrected_geoms\clipped_archive'
-        path=data_path
-    )
+    s.setting.set_export_directory(path=data_dir('shapeified'))
 
     # Generate filepaths
     generator = generate_filepaths(

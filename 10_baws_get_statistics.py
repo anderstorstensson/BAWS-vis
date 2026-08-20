@@ -13,31 +13,30 @@ from pathlib import Path
 
 
 if __name__ == "__main__":
-    # Set path to data directory
-    # data_path = r'C:\Temp\baws_tempo\data_2021\daily_from_raster'
-    # data_path = r'C:\Temp\baws_reanalys\clipped_archive\corrected_geoms'
-    # original
-    # data_path = r'C:\Temp\baws_reanalys\2022\corrected_geoms\clipped_archive'
+    from bawsvis.paths import data_dir
 
-    data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_test\baws_rasterize\prior_years'
-    # data_path = r'C:\Arbetsmapp\BAWS\Årsrapport 2023\Data_prior_years\reanalyzed_data'
-    # Create the Session object
-    s = Session(data_path=data_path)
+    # Set path to data directory (shapefiles regenerated from rasters, script 4)
+    s = Session(data_path=data_dir('shapeified'))
 
-    # If we want to save data to a specific location, we set the export path here.
-    # s.setting.set_export_directory(path=data_path)
+    # Stats json files live in the stats directory.
+    s.setting.set_export_directory(path=data_dir('stats'))
 
-    # year = 2023
-    for year in range(2002, 2023):
+    from bawsvis.utils import discover_years
+
+    for year in discover_years(s.data_path, pattern='cyano_daymap_',
+                               endswith='.shp'):
 
         # Generate filepaths
         generator = generate_filepaths(s.data_path,
                                     pattern=f'cyano_daymap_{year}',
                                     endswith='.shp')
-        # generator = generate_filepaths(s.data_path, pattern='cyano_weekmap_', endswith='.shp')
 
-        stat = json_reader(os.path.join(
-            s.setting.export_directory, f'stats_{year}.json'))
+        stat_path = os.path.join(
+            s.setting.export_directory, f'stats_{year}.json')
+        if not os.path.exists(stat_path):
+            print(f'Skipping {year}: {stat_path} not found (run script 9 first)')
+            continue
+        stat = json_reader(stat_path)
 
         # Loop through the file-generator extract statistics..
         for day_path in generator:
