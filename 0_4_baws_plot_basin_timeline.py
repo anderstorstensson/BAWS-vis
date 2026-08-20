@@ -23,38 +23,12 @@ sns.set_theme()
 sns.set(style="whitegrid")
 
 
-YEAR = 2023
+from bawsvis.basins import BASIN_NAMES, PLOTTED_BASINS, basin_key
 
+# Season year being plotted; set in __main__ from the data present.
+YEAR = None
 
-# mapping_basin_SVAR = {
-#     'BASIN_NR_3': 'Bottenhavet',
-#     'BASIN_NR_4': 'Ålands hav',
-#     'BASIN_NR_6': 'Finska viken',
-#     'BASIN_NR_7': 'Norra Gotlandshavet',
-#     'BASIN_NR_8': 'Västra Gotlandshavet',
-#     'BASIN_NR_9': 'Östra Gotlandshavet',
-#     'BASIN_NR_10': 'Rigabukten',
-#     'BASIN_NR_11': 'Gdanskbukten',
-#     'BASIN_NR_12': 'Bornholmshavet & Hanöbukten',
-#     'BASIN_NR_13': 'Arkonahavet & södra Öresund',
-#     'BASIN_NR_14': 'Bälthavet',
-#     # 'BASIN_NR_15': 'Öresund'
-# }
-
-mapping_basin = {
-    'BASIN_NR_3': 'Bottenhavet',
-    'BASIN_NR_4': 'Ålands hav',
-    'BASIN_NR_6': 'Finska viken',
-    'BASIN_NR_7': 'Norra Egentliga Östersjön',
-    'BASIN_NR_8': 'Västra Gotlandshavet',
-    'BASIN_NR_9': 'Östra Gotlandshavet',
-    'BASIN_NR_10': 'Rigabukten',
-    'BASIN_NR_11': 'Gdanskbukten',
-    'BASIN_NR_12': 'Bornholmshavet',
-    'BASIN_NR_13': 'Arkonahavet',
-    'BASIN_NR_14': 'Bälthavet',
-    # 'BASIN_NR_15': 'Öresund'
-}
+mapping_basin = {basin_key(n): BASIN_NAMES[n] for n in PLOTTED_BASINS}
 
 def change_height(ax, new_value):
     for patch in ax.patches:
@@ -153,14 +127,20 @@ def get_list_of_dataframes(df, only_red=False, only_yellow=False, only_cloud=Fal
 
 
 if __name__ == "__main__":
-    from pathlib import Path
+    import re
     from bawsvis.paths import data_dir
 
-    season_bloom_file = Path(__file__).resolve().parent / 'area_season_bloom_all_test.xlsx'
+    # Combined workbook from script 16: area_season_bloom_all_<first>-<last>.xlsx
+    candidates = sorted(data_dir('stats').glob('area_season_bloom_all_*.xlsx'))
+    if not candidates:
+        raise SystemExit('No area_season_bloom_all_*.xlsx found; run script 16 first')
+    season_bloom_file = candidates[-1]
+    span = re.search(r'(\d{4}-\d{4})', season_bloom_file.stem).group(1)
+    YEAR = int(span.split('-')[1])
 
     stats_df = pd.read_excel(
         season_bloom_file,
-        sheet_name=f'stats_2002-{YEAR}',
+        sheet_name=f'stats_{span}',
         dtype=str,
     )
 
@@ -269,8 +249,7 @@ if __name__ == "__main__":
                 p.text(row.ts_mid, _y, str(row.days), color='black', ha="center", size=8)
             if i == len(data_total_bloom_line) - 1:
                 nr_blooms = get_nr_of_bloom_days(df, row.area)
-                # _x = mdates.datestr2num(df.columns[-1]) + 2
-                _x = stats_df['std_dev_end_hi'].max() + 25
+                _x = ax.get_xlim()[1] + 3
                 _y = patch.get_y() + patch.get_height() / 2
                 p.text(_x, _y, str(nr_blooms), color='black', va="center", size=10)
             basin_y_pos.setdefault(inv_map.get(row.area), patch.get_y())
@@ -325,6 +304,6 @@ if __name__ == "__main__":
     plt.tight_layout()
     # plt.show()
     plt.savefig(
-        data_dir('figures') / f'area_season_bloom_diagram_with_clouds_80percent_{YEAR}_new_colours.png',
+        data_dir('figures') / f'basin_timeline_{YEAR}.png',
         dpi=600)
 
