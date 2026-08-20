@@ -7,6 +7,7 @@ Created on 2021-11-01 11:15
 @author: johannes
 """
 from bawsvis.utils import generate_filepaths
+from bawsvis.selection import only_selected
 from bawsvis.session import Session
 from bawsvis.data_handler import correct_shapefile
 from bawsvis.data_handler import ExteriorLog
@@ -23,10 +24,9 @@ if __name__ == "__main__":
     # Init log. Purpose: save info about multipolygon exterior geometries.
     ExteriorLog()
 
-    # Generate filepaths
-    generator = generate_filepaths(s.data_path, pattern='cyano_daymap_', endswith='.shp')
-    # generator = generate_filepaths(s.data_path, pattern='cyano_daymap_2021', endswith='.shp')
-    # generator = generate_filepaths(s.data_path, pattern='cyano_weekmap', endswith='.shp')
+    # Generate filepaths (restricted to BAWS_YEARS if set)
+    generator = only_selected(
+        generate_filepaths(s.data_path, pattern='cyano_daymap_', endswith='.shp'))
 
     for fid in generator:
         print(fid)

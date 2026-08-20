@@ -51,10 +51,53 @@ Two static inputs go in `shape/`. They are not part of the repository.
 - `GSHHS_h_L1.*`: the GSHHS high resolution coastline used by the map figure. Take it from `GSHHS_shp/h/` in the gshhg-shp archive at https://www.soest.hawaii.edu/pwessel/gshhg/.
 
 ## Running the pipeline
+
+### 1. Get the daily maps
 The daily maps can be downloaded from SMHI's open data WFS instead of being copied from the file server. One shapefile per day is written to `daymaps/`. Days that already exist are skipped, so the download can be rerun after an interruption.
 ```bash
 uv run python fetch_wfs_daymaps.py --years 2002-2026 --out data/daymaps
 ```
+Quality control the daymaps in QGIS before continuing (see the original README below).
+
+### 2. Run the processing steps and the figures
+`run_pipeline.py` runs the numbered scripts in order, each in its own process, and stops at the first script that fails. With no options it processes every season found in `daymaps/` and then draws the four figures.
+```bash
+uv run python run_pipeline.py --list            # show the steps and what they produce
+uv run python run_pipeline.py                   # everything: steps 1-16, then figures 0_1-0_4
+uv run python run_pipeline.py --no-figures      # processing only
+uv run python run_pipeline.py --figures         # figures only (needs steps 1-16 done once)
+uv run python run_pipeline.py --from 9 --to 16  # a range of steps, e.g. statistics only
+uv run python run_pipeline.py --steps 6 7 8     # specific steps (always run in pipeline order)
+uv run python run_pipeline.py --skip 2.1        # leave a step out
+uv run python run_pipeline.py --dry-run ...     # print the plan without running it
+```
+When a step fails, the error message names it. Fix the cause and continue with `--from <step>`. The scripts can also be run one at a time with `uv run python <script>.py`.
+
+### Processing one season or a range of seasons
+`--years` limits the per-season steps to the seasons you name. After a new season has been downloaded and quality controlled, run:
+```bash
+uv run python run_pipeline.py --years 2026
+```
+Years can be given as `--years 2026`, `--years 2002-2010` or `--years 2019 2021`, and must lie between 2002 and the current year.
+
+The restriction applies to steps 1 to 7, 9 to 12 and 14. Steps 8, 13, 15 and 16 always read every season on disk. They produce the climatology and the all-season tables (the mean and standard deviation season curve, the FCA means, `stats_all.json` and the combined season workbook) that the new season is compared against in the figures, and they only read the per-season summary files, so they are quick.
+
+Step 6 is a special case. It writes the per-season aggregation tiff only for the selected seasons, but it always rebuilds the all-season matrix for figure 1, which means reading every daily tiff. This is the slowest part of a single-season rerun. Use `--skip 6` when figure 1 does not need to be updated.
+
+`--years` works by setting the environment variable `BAWS_YEARS`, which the scripts read through `bawsvis/selection.py`. The variable can also be set by hand when running a single script:
+```bash
+BAWS_YEARS=2026 uv run python 10_baws_get_statistics.py
+```
+```powershell
+$env:BAWS_YEARS = "2026"; uv run python 10_baws_get_statistics.py
+```
+
+### Figures for a specific season
+Figure 1 (`0_1`, map of bloom days) and figure 3 (`0_3`, TA and FCA bars) always cover all seasons. Figure 2 (`0_2`, season diagram) and figure 4 (`0_4`, basin timeline) show one season. By default this is the latest season that has daily statistics on disk, and `run_pipeline.py` uses the same year for both figures. Choose another season with `--plot-year`:
+```bash
+uv run python run_pipeline.py --figures --plot-year 2024
+```
+This writes `figures/diagram_2024.png` and `figures/basin_timeline_2024.png`. Figures for other seasons are not touched. `--plot-year` sets the environment variable `BAWS_PLOT_YEAR`, so `BAWS_PLOT_YEAR=2024 uv run python 0_2_baws_season_diagram.py` has the same effect for a single script. The season must have been processed first: its `stats_<year>_2.json` and its sheet in the combined season workbook must exist.
 
 ## Original README
 Post season processing pinpoints

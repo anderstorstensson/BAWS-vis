@@ -3,6 +3,7 @@ Created on 2021-09-02 14:57
 @author: johannes
 """
 from bawsvis.utils import generate_filepaths
+from bawsvis.selection import only_selected
 from bawsvis.session import Session
 from bawsvis.data_handler import create_7day_composite
 from bawsvis.paths import data_dir
@@ -14,12 +15,12 @@ if __name__ == "__main__":
     # the daily tiffs, i.e. into corrected_geoms/ as well.
     s = Session(data_path=data_dir('corrected_geoms'))
 
-    # Generate filepaths
-    generator = generate_filepaths(
+    # Generate filepaths (restricted to BAWS_YEARS if set)
+    generator = only_selected(generate_filepaths(
         s.data_path,
         pattern='cyano_daymap_',
         endswith='.tiff'
-    )
+    ))
 
     for f in generator:
         print(f)
