@@ -32,7 +32,7 @@ def get_areas_index(areas, cyano_shp, value=None, not_index=None):
                 if cloud_cover >= areas['area_threshold'][i]:
                     res.append(i)
     else:
-        inp, res = areas.sindex.query_bulk(
+        inp, res = areas.sindex.query(
             cyano_shp[boolean_bloom].geometry,
             predicate='intersects'
         )
@@ -47,9 +47,8 @@ if __name__ == "__main__":
     if not basin_shp.exists():
         raise SystemExit(
             f'Missing SVAR basin shapefile: {basin_shp}\n'
-            'Copy Havsomr_SVAR_2016_3b_CP1252.* there, e.g. from '
-            '/media/anders/work/R_backup/shapefiles/sharkweb_shapefiles/ '
-            'or download "Havsomraden SVAR2016" from SMHI open data: '
+            'Copy Havsomr_SVAR_2016_3b_CP1252.* there. '
+            'Download "Havsomraden SVAR2016" from SMHI open data: '
             'https://www.smhi.se/data/utforskaren-oppna-data/havsomraden-svar2016'
         )
     areas = gp.read_file(basin_shp, encoding='cp1252')
