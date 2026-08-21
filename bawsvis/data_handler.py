@@ -23,7 +23,6 @@ from bawsvis.interpolate import get_interpolated_df
 
 import shapely
 import fiona
-from fiona.crs import to_string
 import rasterio as rio
 from rasterio.features import shapes, rasterize
 import geopandas as gp
@@ -70,7 +69,7 @@ def shapeify_clouds(array, export_path=None):
     schema = {'properties': [('class', 'int')], 'geometry': 'Polygon'}
     crs, transform, area_shape = area2transform_baws1000_sweref99tm()
     with fiona.open(export_path, 'w', driver='ESRI Shapefile',
-                    crs=to_string(crs), schema=schema) as dst:
+                    crs=crs.to_string(), schema=schema) as dst:
         dst.writerecords(shape_list)
 
 
@@ -92,7 +91,7 @@ def shapeify_annual(rst_path, export_path=None):
 
     crs, transform, area_shape = area2transform_baws1000_sweref99tm()
 
-    with fiona.open(fname, 'w', driver='ESRI Shapefile', crs=to_string(crs), schema=schema) as dst:
+    with fiona.open(fname, 'w', driver='ESRI Shapefile', crs=crs.to_string(), schema=schema) as dst:
         dst.writerecords(shape_list)
 
 
@@ -114,7 +113,7 @@ def shapeify_weekly(rst_path, export_path=None):
 
     crs, transform, area_shape = area2transform_baws1000_sweref99tm()
 
-    with fiona.open(fname, 'w', driver='ESRI Shapefile', crs=to_string(crs), schema=schema) as dst:
+    with fiona.open(fname, 'w', driver='ESRI Shapefile', crs=crs.to_string(), schema=schema) as dst:
         dst.writerecords(shape_list)
 
 
@@ -136,7 +135,7 @@ def shapeify(rst_path, export_path=None):
 
     crs, transform, area_shape = area2transform_baws1000_sweref99tm()
 
-    with fiona.open(fname, 'w', driver='ESRI Shapefile', crs=to_string(crs), schema=schema) as dst:
+    with fiona.open(fname, 'w', driver='ESRI Shapefile', crs=crs.to_string(), schema=schema) as dst:
         dst.writerecords(shape_list)
 
 
@@ -679,7 +678,7 @@ def correct_shapefile(fid, export_path=None):
 
     out_path = os.path.join(export_path, os.path.basename(fid))
     with fiona.open(out_path, 'w',
-                    driver='ESRI Shapefile', crs=to_string(crs),
+                    driver='ESRI Shapefile', crs=crs.to_string(),
                     schema=schema) as dst:
         dst.writerecords(shapes)
 
