@@ -6,3 +6,4 @@ export/*
 *.pickle
 .venv/
 data/
+docs/

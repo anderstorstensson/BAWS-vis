@@ -67,6 +67,10 @@ PROCESSING_STEPS = (
      'Combine daily statistics into stats_all.json (all seasons)'),
     ('16', '16_baws_bloom_start_end.py',
      'Bloom start/end/length per basin and the combined season workbook'),
+    ('17', '17_baws_basin_daily_areas.py',
+     'Daily cloud/bloom areas per sea basin from the daily tiffs'),
+    ('18', '18_baws_bloom_indicator.py',
+     'Bloom indicator (5 % FCA threshold) per basin and pooled (all seasons)'),
 )
 
 FIGURE_STEPS = (
@@ -78,6 +82,8 @@ FIGURE_STEPS = (
      'Fig 3: TA / FCA bars, all seasons'),
     ('0_4', '0_4_baws_plot_basin_timeline.py',
      'Fig 4: bloom timeline per basin for one season (BAWS_PLOT_YEAR)'),
+    ('0_5', '0_5_baws_plot_indicator.py',
+     'Fig 5: bloom indicator time series, all seasons'),
 )
 
 ALL_STEPS = PROCESSING_STEPS + FIGURE_STEPS
