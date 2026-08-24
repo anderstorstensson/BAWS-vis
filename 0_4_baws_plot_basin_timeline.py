@@ -264,7 +264,7 @@ if __name__ == "__main__":
                 [stats_df.loc[basin_bool, tw]]*2,
                 [y_pos-.05, y_pos+.40],
                 # [y_pos, y_pos+.525],
-                '-k',
+                '-',
                 lw=1,
                 color='#C24A50'
             )
@@ -297,12 +297,18 @@ if __name__ == "__main__":
     ax.grid(False)
     sns.despine(offset=5, ax=ax, bottom=True, left=True)
 
+    # Pin the minor ticks to fixed positions so the labels can be replaced
+    # (set_ticklabels without a FixedLocator triggers a UserWarning).
+    minor_ticks = ax.get_xticks(minor=True)
+    ax.set_xticks(minor_ticks, minor=True)
+    ax.set_xticklabels(
+        ['', 'Juni', '', '', 'Juli', '', '', 'Augusti', '', '', 'September', ''][:len(minor_ticks)],
+        minor=True,
+    )
+
     for i, l in enumerate(ax.get_xticklabels(minor=True)):
         if i in (1, 4, 7, 10):
             l.set_y(1.05)
-
-    # ax.set_xticklabels(['', 'JUN', '', '', 'JUL', '', '', 'AUG', ''], minor=True)
-    ax.set_xticklabels(['', 'Juni', '', '', 'Juli', '', '', 'Augusti', '', '', 'September', ''], minor=True)
 
     plt.tight_layout()
     # plt.show()
