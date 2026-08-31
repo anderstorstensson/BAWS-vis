@@ -20,6 +20,7 @@ Standard stage directories under the data root:
     aggregates/       scripts 6-7 output; seasonal aggregation rasters,
                       text matrices and annual shapefiles
     stats/            scripts 8-15 output; json/xlsx statistics
+    indicator/        script 18 output; indicator text series (year;value)
     figures/          plotting output (0_1-0_3, box plots)
     shape/            static user-provided inputs (not generated, not in
                       git): the SVAR sea-basin shapefiles used by script
@@ -40,6 +41,7 @@ STAGES = (
     'clouds',
     'aggregates',
     'stats',
+    'indicator',
     'figures',
     'shape',
 )

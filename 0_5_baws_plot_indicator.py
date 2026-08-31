@@ -9,6 +9,9 @@ Reads stats/bloom_indicator_<first>-<last>.csv (script 18) and writes
                                      and surface days per year
   figures/indicator_per_basin.png    year x basin heatmaps of the same
                                      metrics
+  figures/indicator_bars.png         the three main exported series
+                                     (startdatum, blomningsdagar,
+                                     medelutbredning) as pooled bar graphs
 
 Seasons flagged low_coverage are drawn with hollow markers / hatched bars.
 """
@@ -105,6 +108,52 @@ def figure_all_basins(table, out):
     plt.close(fig)
 
 
+def quality_bars(ax, pooled, heights, bottom=0.0):
+    """Bars per year; hatched when the season is flagged low_coverage."""
+    ok = (pooled['quality'] == 'ok').to_numpy()
+    values = np.asarray(heights, dtype=float)
+    years = pooled['year'].to_numpy()
+    for flag, hatch in ((ok, None), (~ok, '///')):
+        sel = flag & ~np.isnan(values)
+        ax.bar(years[sel], values[sel], bottom=bottom, width=0.7,
+               color=HUE if hatch is None else 'white',
+               edgecolor=HUE, hatch=hatch, linewidth=1)
+    ax.set_xlim(years.min() - 0.7, years.max() + 0.7)
+
+
+def plot_start_bars(ax, pooled):
+    floor = mdates.date2num(pd.Timestamp(DUMMY_YEAR, *ind.SEASON_START))
+    quality_bars(ax, pooled, day_of_season(pooled['start']) - floor,
+                 bottom=floor)
+    ax.yaxis.set_major_locator(mdates.MonthLocator())
+    ax.yaxis.set_major_formatter(mdates.DateFormatter('%-d %b'))
+    ax.set_ylim(floor, mdates.date2num(pd.Timestamp(DUMMY_YEAR, 9, 1)))
+    style_axis(ax, '')
+    ax.set_title('Startdatum', loc='left', fontsize=11, color=INK)
+
+
+def figure_indicator_bars(table, out):
+    pooled = table[table['basin_nr'] == ind.ALL_BASINS].sort_values('year')
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.5), constrained_layout=True)
+    plot_start_bars(axes[0], pooled)
+    for ax, heights, title, ylabel in (
+            (axes[1], pooled['bloom_days'], 'Blomningsdagar', 'dagar'),
+            (axes[2], pooled['mean_fca'] * pooled['valid_km2'] / 1000,
+             'Medelutbredning', '1000 km²')):
+        quality_bars(ax, pooled, heights)
+        style_axis(ax, ylabel)
+        ax.set_ylim(bottom=0)
+        ax.set_title(title, loc='left', fontsize=11, color=INK)
+    fig.suptitle('Cyanoblomning – indikatorer, hela området '
+                 f'({pooled["year"].min()}–{pooled["year"].max()})',
+                 fontsize=13, color=INK, x=0.01, ha='left')
+    fig.text(0.01, -0.03,
+             'Skrafferade staplar: färre än 60 % av säsongens dagar '
+             'observerade.', fontsize=8, color=INK_MUTED)
+    fig.savefig(out, dpi=150, bbox_inches='tight')
+    plt.close(fig)
+
+
 def heatmap(ax, grid, title, fmt):
     ax.grid(False)
     im = ax.imshow(grid.values, aspect='auto', cmap='Blues', vmin=0)
@@ -140,8 +189,10 @@ def main():
     figures = data_dir('figures')
     figure_all_basins(table, figures / 'indicator_all_basins.png')
     figure_per_basin(table, figures / 'indicator_per_basin.png')
+    figure_indicator_bars(table, figures / 'indicator_bars.png')
     print('wrote', figures / 'indicator_all_basins.png')
     print('wrote', figures / 'indicator_per_basin.png')
+    print('wrote', figures / 'indicator_bars.png')
 
 
 if __name__ == '__main__':

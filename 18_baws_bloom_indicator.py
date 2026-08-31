@@ -12,6 +12,16 @@ fixed 1 Jun - 30 Sep window). Writes
       per_basin  : one row per year and basin
       method     : the parameters used
   stats/bloom_indicator_<first>-<last>.csv   (per_basin + all, long)
+  indicator/data_cyanoblomning_JJAS_<basin>_<parameter>.txt
+      one year;value line per year (LF, empty value when undefined),
+      basin 'sverige' for the pooled series, else the basin name;
+      parameters: startdatum (day of year), blomningsdagar (days with
+      smoothed FCA >= threshold), cyanoblomningens_langd (span_days,
+      start to end), medelutbredning (mean FCA x basin sea area,
+      1000 km2), maxutbredning (peak smoothed FCA x basin sea area,
+      1000 km2; supporting series, coverage-sensitive) and
+      observerad_andel (percent of season days with a usable FCA
+      value, the basis of the quality flag)
 
 Always reads all seasons on disk (ignores BAWS_YEARS).
 """
@@ -21,6 +31,9 @@ from bawsvis import indicator as ind
 from bawsvis.basins import BASIN_NAMES
 from bawsvis.paths import data_dir
 from bawsvis.utils import discover_years
+
+TEXT_PREFIX = 'data_cyanoblomning_JJAS'
+POOLED_TEXT_BASIN = 'sverige'
 
 METHOD = {
     'fca_threshold': ind.THRESHOLD,
@@ -48,6 +61,56 @@ def with_names(table):
         ['year', 'basin_nr', 'basin_name', *ind.METRIC_COLUMNS]]
 
 
+def day_of_year(value):
+    return '' if pd.isna(value) else str(value.dayofyear)
+
+
+def span_days(row):
+    return '' if pd.isna(row['start']) else str(int(row['span_days']))
+
+
+def bloom_days(row):
+    return '' if pd.isna(row['mean_fca']) else str(int(row['bloom_days']))
+
+
+def extent_1000km2(row, column):
+    if pd.isna(row[column]):
+        return ''
+    return f"{row[column] * row['valid_km2'] / 1000:.1f}"
+
+
+TEXT_PARAMETERS = {
+    'startdatum': lambda row: day_of_year(row['start']),
+    'blomningsdagar': bloom_days,
+    'cyanoblomningens_langd': span_days,
+    'medelutbredning': lambda row: extent_1000km2(row, 'mean_fca'),
+    'maxutbredning': lambda row: extent_1000km2(row, 'peak_smoothed_fca'),
+    'observerad_andel': lambda row: str(round(row['observed_fraction'] * 100)),
+}
+
+
+def basin_token(name):
+    return name.lower().translate(str.maketrans('åäö', 'aao')).replace(' ', '_')
+
+
+def write_text_series(out_dir, token, rows):
+    for parameter, value in TEXT_PARAMETERS.items():
+        lines = [f'{int(row["year"])};{value(row)}' for row in rows]
+        path = out_dir / f'{TEXT_PREFIX}_{token}_{parameter}.txt'
+        path.write_text('\n'.join(lines) + '\n', encoding='utf-8',
+                        newline='\n')
+
+
+def write_text_files(table, out_dir):
+    for basin, group in table.groupby('basin_name', sort=False):
+        token = POOLED_TEXT_BASIN if basin == ind.ALL_BASINS \
+            else basin_token(basin)
+        rows = group.sort_values('year').to_dict('records')
+        write_text_series(out_dir, token, rows)
+    print('wrote', len(table['basin_name'].unique()) * len(TEXT_PARAMETERS),
+          'text series in', out_dir)
+
+
 def main():
     stats_dir = data_dir('stats')
     years = discover_years(stats_dir, pattern='basin_daily_areas_',
@@ -69,6 +132,7 @@ def main():
             .to_excel(writer, sheet_name='method', index=False)
     table.to_csv(stats_dir / f'bloom_indicator_{span}.csv', index=False,
                  date_format='%Y-%m-%d')
+    write_text_files(table, data_dir('indicator'))
     print('wrote', out)
     print(pooled.to_string(index=False))
 
