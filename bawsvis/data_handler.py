@@ -143,11 +143,15 @@ def get_shapes_from_raster(raster, exclude_values=None):
     exclude_values = exclude_values or [0, 4]
     shapes_with_properties = []
 
-    # rasterio.features.shapes does not accept 64-bit integers; plain
-    # .astype(int) gives int64 on Linux (but int32 on Windows).
-    raster = np.asarray(raster).astype(np.int32)
-
     crs, transform, area_shape = area2transform_baws1000_sweref99tm()
+
+    # Cast raster to supported type
+    raster = np.array(raster, copy=False)
+    if not np.issubdtype(raster.dtype, np.integer) and not np.issubdtype(raster.dtype, np.floating):
+        raster = raster.astype(np.uint8)
+    elif raster.dtype not in [np.int8, np.uint8, np.int16, np.uint16, np.int32, np.float32, np.float64]:
+        # If unsupported integer type, cast to int32
+        raster = raster.astype(np.int32)
 
     classes = {int(cls): {'class': int(cls)} for cls in np.unique(raster)}
     classes[0] = None
@@ -607,8 +611,8 @@ def correct_shapefile(fid, export_path=None):
     name = os.path.basename(fid)
 
     shapes = []
-    for i, shape in enumerate(gf._to_geo()['features']):
-
+    for i, shape in enumerate(gf.__geo_interface__['features']):
+        # Select the corresponding row in gf
         row_gf = gf.iloc[i: i + 1].explode(index_parts=False).reset_index(drop=True)
 
         if row_gf.shape[0] > 1:

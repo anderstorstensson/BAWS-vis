@@ -19,14 +19,14 @@ if __name__ == "__main__":
 
     s = Session()
 
-    # Use the most recent all-years aggregation matrix from script 6.
-    candidates = sorted(data_dir('aggregates').glob('aggregation_*.txt'))
+    # Use the most recent all-years aggregation raster from script 6
+    # (the hyphenated span distinguishes it from the per-season tiffs).
+    candidates = sorted(data_dir('aggregates').glob('aggregation_*-*.tiff'))
     if not candidates:
-        raise SystemExit('No aggregation_*.txt found; run script 6 first')
+        raise SystemExit('No aggregation_<span>.tiff found; run script 6 first')
     file = candidates[-1]
 
-    # data, meta = raster_reader(file, include_meta=True)
-    data = np.loadtxt(file)
+    data = raster_reader(str(file))
 
     # map_frame = {'lat_min': 52., 'lat_max': 66.,
     #              'lon_min': 7., 'lon_max': 37.5}
