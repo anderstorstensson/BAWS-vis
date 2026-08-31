@@ -66,6 +66,7 @@ uv run python run_pipeline.py --list            # show the steps and what they p
 uv run python run_pipeline.py                   # everything: steps 1-18, then figures 0_1-0_5
 uv run python run_pipeline.py --no-figures      # processing only
 uv run python run_pipeline.py --figures         # figures only (needs steps 1-18 done once)
+uv run python run_pipeline.py --indicator       # indicator data files only (steps 1, 2, 2.1, 17, 18)
 uv run python run_pipeline.py --from 9 --to 16  # a range of steps, e.g. statistics only
 uv run python run_pipeline.py --steps 6 7 8     # specific steps (always run in pipeline order)
 uv run python run_pipeline.py --skip 2.1        # leave a step out
@@ -103,11 +104,20 @@ This writes `figures/diagram_2024.png` and `figures/basin_timeline_2024.png`. Fi
 A threshold-based indicator of bloom extent, start and length, per sea basin and for all basins pooled, intended for a climate indicator. It is computed from the daily 1 km class rasters rather than from the first/last day a bloom polygon touched a basin, so single pixels and single clear days do not set the dates.
 
 - Step 17 (`17_baws_basin_daily_areas.py`) counts cloud, subsurface and surface pixels per SVAR basin and day inside the BAWS valid area (`raster_landmask_baws1000_sweref99tm.tiff`, 352 682 km2) and writes `stats/basin_daily_areas_<year>.csv`. The basin label raster is cached as `stats/basin_labels_baws1000.tiff`; delete it if the basin shapefile changes.
-- Step 18 (`18_baws_bloom_indicator.py`) applies `bawsvis/indicator.py` and writes `stats/bloom_indicator_<first>-<last>.xlsx` (sheets `all_basins`, `per_basin`, `method`) and the same table as csv.
+- Step 18 (`18_baws_bloom_indicator.py`) applies `bawsvis/indicator.py` and writes `stats/bloom_indicator_<first>-<last>.xlsx` (sheets `all_basins`, `per_basin`, `method`), the same table as csv, and the `indicator/data_cyanoblomning_JJA_<basin>_<parameter>.txt` delivery series.
+
+### Updating the indicator after a season
+The indicator files only need the daily class tiffs, not the rest of the pipeline. After the season:
+```bash
+uv run python fetch_wfs_daymaps.py --years 2026 --out data/daymaps
+# quality control the new daymaps in QGIS, then
+uv run python run_pipeline.py --indicator --years 2026
+```
+`--indicator` runs steps 1, 2 and 2.1 (daymaps to landmasked daily tiffs) for the selected seasons, step 17 (per-basin daily areas) and step 18, which always recomputes the indicator from every season on disk. Weekly composites, the statistics files and the figures are left untouched; run the full pipeline when those need the new season too. A season whose window has not yet passed (plus a grace week) is flagged preliminary and kept out of the text series until a later run finds it complete.
 
 Method (parameters in `bawsvis/indicator.py`):
 - Daily FCA = bloom area / cloud-free observed area in the basin. A day is unusable for a basin if less than 20 % of the basin was observed. "All basins" sums the areas of the twelve basins (320 814 km2) before the ratio is taken, so it is the same quantity at another aggregation level. Kattegat, Norra Kvarken and Skärgårdshavet (SVAR 16, 2, 5) are inside the BAWS area but not among the twelve basins and are therefore not part of the pooled value.
-- Season window is fixed to 1 June to 30 September.
+- Season window is fixed to 1 June to 31 August.
 - Start and end are the first and last day the 7-day centred running mean of FCA is at least 5 % for at least 3 consecutive days. `span_days` is end to start inclusive, `bloom_days` the number of days the smoothed FCA is at least 5 % (can exceed the span when short runs occur outside the persistent period).
 - Extent is `mean_fca`, the mean daily FCA over the window (unobserved days excluded), with `mean_bloom_km2` and `peak_fca` / `peak_date` as supporting values.
 - `surface_days` counts days with smoothed surface-accumulation FCA of at least 1 %.

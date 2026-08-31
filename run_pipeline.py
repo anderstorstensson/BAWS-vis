@@ -16,6 +16,7 @@ Examples
     uv run python run_pipeline.py --from 9 --to 16     # statistics only
     uv run python run_pipeline.py --figures --plot-year 2024
     uv run python run_pipeline.py --steps 6 7 8 --dry-run
+    uv run python run_pipeline.py --indicator --years 2026
 """
 import argparse
 import os
@@ -87,6 +88,12 @@ FIGURE_STEPS = (
 )
 
 ALL_STEPS = PROCESSING_STEPS + FIGURE_STEPS
+
+# The steps behind the indicator data files (stats/bloom_indicator_* and
+# indicator/*.txt): daymaps -> daily tiffs -> basin areas -> indicator.
+INDICATOR_STEP_KEYS = ('1', '2', '2.1', '17', '18')
+INDICATOR_STEPS = tuple(
+    s for s in PROCESSING_STEPS if s[0] in INDICATOR_STEP_KEYS)
 
 
 def step_keys(steps=ALL_STEPS):
@@ -222,6 +229,10 @@ def build_parser():
                        help='Run only the figure scripts (0_1 to 0_4)')
     group.add_argument('--no-figures', action='store_true',
                        help='Run the processing steps but not the figures')
+    group.add_argument('--indicator', action='store_true',
+                       help='Run only the steps behind the indicator data '
+                            'files (' + ', '.join(INDICATOR_STEP_KEYS) + '), '
+                            'no figures')
     parser.add_argument('--list', action='store_true',
                         help='List the steps and exit')
     parser.add_argument('--dry-run', action='store_true',
@@ -245,8 +256,10 @@ def main(argv=None):
               f'{format_years(years)}; the figures use the statistics '
               f'already on disk for that season.', file=sys.stderr)
 
-    pool = FIGURE_STEPS if args.figures else (
-        PROCESSING_STEPS if args.no_figures else ALL_STEPS)
+    pool = (FIGURE_STEPS if args.figures
+            else INDICATOR_STEPS if args.indicator
+            else PROCESSING_STEPS if args.no_figures
+            else ALL_STEPS)
     try:
         steps = select_steps(pool, start=args.start, stop=args.stop,
                              only=args.steps, skip=args.skip)
