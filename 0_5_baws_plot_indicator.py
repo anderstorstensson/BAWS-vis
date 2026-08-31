@@ -33,7 +33,7 @@ DUMMY_YEAR = 2001        # common year for day-of-season axes
 
 PANELS = (
     ('bloom_days', 'Bloom days (smoothed FCA ≥ 5 %)', 'days'),
-    ('mean_fca', 'Mean bloom extent, 1 Jun–30 Sep', 'fraction of observed area'),
+    ('mean_fca', 'Mean bloom extent, 1 Jun–31 Aug', 'fraction of observed area'),
     ('surface_days', 'Surface accumulation days (≥ 1 %)', 'days'),
 )
 
@@ -102,8 +102,9 @@ def figure_all_basins(table, out):
                  fontsize=13, color=INK, x=0.01, ha='left')
     fig.text(0.01, -0.02,
              'Hollow markers / hatched bars: fewer than 60 % of season days '
-             'observed. Threshold 5 % of cloud-free area, 7-day mean, '
-             '3-day persistence.', fontsize=8, color=INK_MUTED)
+             'observed, or season not yet complete. Threshold 5 % of '
+             'cloud-free area, 7-day mean, 3-day persistence.',
+             fontsize=8, color=INK_MUTED)
     fig.savefig(out, dpi=150, bbox_inches='tight')
     plt.close(fig)
 
@@ -149,7 +150,8 @@ def figure_indicator_bars(table, out):
                  fontsize=13, color=INK, x=0.01, ha='left')
     fig.text(0.01, -0.03,
              'Skrafferade staplar: färre än 60 % av säsongens dagar '
-             'observerade.', fontsize=8, color=INK_MUTED)
+             'observerade eller ännu ofullständig säsong.',
+             fontsize=8, color=INK_MUTED)
     fig.savefig(out, dpi=150, bbox_inches='tight')
     plt.close(fig)
 

@@ -5,14 +5,14 @@
 
 Reads every stats/basin_daily_areas_<year>.csv (script 17) and applies
 bawsvis.indicator (5 % FCA threshold, 3-day persistence, 7-day smoothing,
-fixed 1 Jun - 30 Sep window). Writes
+fixed 1 Jun - 31 Aug window). Writes
 
   stats/bloom_indicator_<first>-<last>.xlsx
       all_basins : one row per year, the pooled indicator
       per_basin  : one row per year and basin
       method     : the parameters used
   stats/bloom_indicator_<first>-<last>.csv   (per_basin + all, long)
-  indicator/data_cyanoblomning_JJAS_<basin>_<parameter>.txt
+  indicator/data_cyanoblomning_JJA_<basin>_<parameter>.txt
       one year;value line per year (LF, empty value when undefined),
       basin 'sverige' for the pooled series, else the basin name;
       parameters: startdatum (day of year), blomningsdagar (days with
@@ -23,6 +23,10 @@ fixed 1 Jun - 30 Sep window). Writes
       observerad_andel (percent of season days with a usable FCA
       value, the basis of the quality flag)
 
+A season whose window (plus a grace week) has not yet passed at run
+time is flagged 'preliminary': it is kept in the workbook and CSV but
+left out of the text series until a later run finds it complete.
+
 Always reads all seasons on disk (ignores BAWS_YEARS).
 """
 import pandas as pd
@@ -32,7 +36,7 @@ from bawsvis.basins import BASIN_NAMES
 from bawsvis.paths import data_dir
 from bawsvis.utils import discover_years
 
-TEXT_PREFIX = 'data_cyanoblomning_JJAS'
+TEXT_PREFIX = 'data_cyanoblomning_JJA'
 POOLED_TEXT_BASIN = 'sverige'
 
 METHOD = {
@@ -44,6 +48,7 @@ METHOD = {
     'min_season_coverage': ind.MIN_SEASON_COVERAGE,
     'season_window': f'{ind.SEASON_START[0]:02d}-{ind.SEASON_START[1]:02d}'
                      f' to {ind.SEASON_END[0]:02d}-{ind.SEASON_END[1]:02d}',
+    'preliminary_until': f'{ind.PRELIMINARY_GRACE_DAYS} days past season end',
     'valid_area': 'raster_landmask_baws1000_sweref99tm.tiff',
 }
 
@@ -102,6 +107,12 @@ def write_text_series(out_dir, token, rows):
 
 
 def write_text_files(table, out_dir):
+    preliminary = table['quality'] == 'preliminary'
+    if preliminary.any():
+        years = sorted(table.loc[preliminary, 'year'].unique())
+        print('season(s) still running, kept out of the text series:',
+              ', '.join(str(y) for y in years))
+    table = table[~preliminary]
     for basin, group in table.groupby('basin_name', sort=False):
         token = POOLED_TEXT_BASIN if basin == ind.ALL_BASINS \
             else basin_token(basin)
