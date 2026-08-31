@@ -26,7 +26,7 @@ from bawsvis.paths import data_dir, repo_file
 from bawsvis.utils import discover_years, generate_filepaths
 
 LABEL_RASTER = 'basin_labels_baws1000.tiff'
-SVAR_SHAPEFILE = 'Havsomr_SVAR_2016_3b_CP1252.shp'
+SVAR_SHAPEFILE = 'Havsomr_SHARK_mod_SVAR2022_v1.shp'
 
 
 def read_basins(shape_dir):

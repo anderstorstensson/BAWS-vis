@@ -1,6 +1,6 @@
 # Copyright (c) 2020 SMHI, Swedish Meteorological and Hydrological Institute.
 # License: MIT License (see LICENSE.txt or http://opensource.org/licenses/mit).
-"""Baltic sub-basins (SVAR 2016_3b BASIN_NR) used in the basin statistics.
+"""Baltic sub-basins (SVAR BASIN_NR, SHARK-mod SVAR2022) used in the basin statistics.
 
 Basin 15 (Öresund) is included in the area tables (script 14) but left
 out of the report figure, as in the original box-plot script.

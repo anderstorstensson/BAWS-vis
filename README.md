@@ -47,7 +47,7 @@ shape/            static inputs, see below
 ```
 
 Two static inputs go in `shape/`. They are not part of the repository.
-- `Havsomr_SVAR_2016_3b_CP1252.*`: the SVAR sea basins used by script 14. Available from SMHI open data (Havsområden SVAR2016).
+- `Havsomr_SHARK_mod_SVAR2022_v1.*`: the SVAR sea basins used by scripts 14 and 17. A SHARK-modified product: the SVAR 2022:1.1 coastal and offshore water bodies (Swedish waters, new Lantmäteriet hydrography) completed with the outer-Baltic basin parts so every BASIN_NR basin covers the whole Baltic. SVAR2022 itself stops at the territorial sea limit and has no havsområden product, so this file is not directly downloadable from SMHI open data.
 - `GSHHS_h_L1.*`: the GSHHS high resolution coastline used by the map figure. Take it from `GSHHS_shp/h/` in the gshhg-shp archive at https://www.soest.hawaii.edu/pwessel/gshhg/.
 
 ## Running the pipeline
@@ -116,7 +116,7 @@ uv run python run_pipeline.py --indicator --years 2026
 `--indicator` runs steps 1, 2 and 2.1 (daymaps to landmasked daily tiffs) for the selected seasons, step 17 (per-basin daily areas) and step 18, which always recomputes the indicator from every season on disk. Weekly composites, the statistics files and the figures are left untouched; run the full pipeline when those need the new season too. A season whose window has not yet passed (plus a grace week) is flagged preliminary and kept out of the text series until a later run finds it complete.
 
 Method (parameters in `bawsvis/indicator.py`):
-- Daily FCA = bloom area / cloud-free observed area in the basin. A day is unusable for a basin if less than 20 % of the basin was observed. "All basins" sums the areas of the twelve basins (320 814 km2) before the ratio is taken, so it is the same quantity at another aggregation level. Kattegat, Norra Kvarken and Skärgårdshavet (SVAR 16, 2, 5) are inside the BAWS area but not among the twelve basins and are therefore not part of the pooled value.
+- Daily FCA = bloom area / cloud-free observed area in the basin. A day is unusable for a basin if less than 20 % of the basin was observed. "All basins" sums the areas of the twelve basins (320 819 km2) before the ratio is taken, so it is the same quantity at another aggregation level. Kattegat, Norra Kvarken and Skärgårdshavet (SVAR 16, 2, 5) are inside the BAWS area but not among the twelve basins and are therefore not part of the pooled value.
 - Season window is fixed to 1 June to 31 August.
 - Start and end are the first and last day the 7-day centred running mean of FCA is at least 5 % for at least 3 consecutive days. `span_days` is end to start inclusive, `bloom_days` the number of days the smoothed FCA is at least 5 % (can exceed the span when short runs occur outside the persistent period).
 - Extent is `mean_fca`, the mean daily FCA over the window (unobserved days excluded), with `mean_bloom_km2` and `peak_fca` / `peak_date` as supporting values.

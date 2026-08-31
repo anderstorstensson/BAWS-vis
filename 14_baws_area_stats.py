@@ -43,13 +43,13 @@ if __name__ == "__main__":
     from bawsvis.paths import data_dir
 
     # "POLY_NAMN"
-    basin_shp = data_dir('shape') / 'Havsomr_SVAR_2016_3b_CP1252.shp'
+    basin_shp = data_dir('shape') / 'Havsomr_SHARK_mod_SVAR2022_v1.shp'
     if not basin_shp.exists():
         raise SystemExit(
             f'Missing SVAR basin shapefile: {basin_shp}\n'
-            'Copy Havsomr_SVAR_2016_3b_CP1252.* there. '
-            'Download "Havsomraden SVAR2016" from SMHI open data: '
-            'https://www.smhi.se/data/utforskaren-oppna-data/havsomraden-svar2016'
+            'Copy Havsomr_SHARK_mod_SVAR2022_v1.* there '
+            '(SHARK-modified SVAR2022 sea basins, whole-Baltic '
+            'coverage with BASIN_NR; see README, Data directory).'
         )
     areas = gp.read_file(basin_shp, encoding='cp1252')
     if areas.crs is None:
