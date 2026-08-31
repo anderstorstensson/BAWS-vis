@@ -135,13 +135,17 @@ def generate_filepaths(directory, pattern='', not_pattern='DUMMY_PATTERN',
                     yield os.path.abspath(os.path.join(path, f))
 
 
-def discover_years(directory, pattern='', endswith=''):
+def discover_years(directory, pattern='', endswith='', selected=False):
     """Return a sorted list of years found in matching file names.
 
     Scans `directory` for files matching `pattern`/`endswith` (same
     semantics as generate_filepaths) and extracts the first four-digit
     year (20xx) from each file name. Lets pipeline scripts loop over the
     years actually present in the data instead of hardcoded ranges.
+
+    With selected=True the list is further restricted to the seasons
+    requested through BAWS_YEARS (see bawsvis.selection). Per-season
+    stages pass this; cross-season stages (climatologies) must not.
     """
     years = set()
     for fid in generate_filepaths(directory, pattern=pattern,
@@ -149,6 +153,9 @@ def discover_years(directory, pattern='', endswith=''):
         match = re.search(r'(20\d{2})', os.path.basename(fid))
         if match:
             years.add(int(match.group(1)))
+    if selected:
+        from bawsvis.selection import restrict_years
+        return restrict_years(years)
     return sorted(years)
 
 

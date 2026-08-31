@@ -7,6 +7,7 @@ Created on 2021-07-01 08:58
 import rasterio as rio
 import numpy as np
 from bawsvis.utils import generate_filepaths
+from bawsvis.selection import only_selected
 
 
 def raster_reader(fid, include_meta=False):
@@ -27,11 +28,11 @@ if __name__ == "__main__":
     mask, meta = raster_reader(
         repo_file('raster_landmask_baws1000_sweref99tm.tiff'), include_meta=True)
 
-    files = generate_filepaths(
+    files = only_selected(generate_filepaths(
         data_dir('corrected_geoms'),
         pattern='cyano_daymap',
         endswith='.tiff',
-    )
+    ))
     for fid in files:
         print(fid)
         cyano_day = raster_reader(fid)

@@ -8,7 +8,6 @@ Created on 2020-08-28 10:20
 """
 import shapely
 import fiona
-from fiona.crs import to_string
 import rasterio as rio
 from rasterio import features
 from rasterio.features import shapes, rasterize
