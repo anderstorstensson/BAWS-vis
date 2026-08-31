@@ -20,11 +20,12 @@ Standard stage directories under the data root:
     aggregates/       scripts 6-7 output; seasonal aggregation rasters,
                       text matrices and annual shapefiles
     stats/            scripts 8-15 output; json/xlsx statistics
+    indicator/        script 18 output; indicator text series (year;value)
     figures/          plotting output (0_1-0_3, box plots)
     shape/            static user-provided inputs (not generated, not in
-                      git): the SVAR sea-basin shapefiles used by script
-                      14 (Havsomr_SVAR_2016_3b_CP1252.*), downloadable
-                      from SMHI's open data (Havsomraden SVAR2016)
+                      git): the SVAR sea-basin shapefile used by scripts
+                      14 and 17 (Havsomr_SHARK_mod_SVAR2022_v1.*, the
+                      SHARK-modified SVAR2022 basins with BASIN_NR)
 """
 import os
 from pathlib import Path
@@ -40,6 +41,7 @@ STAGES = (
     'clouds',
     'aggregates',
     'stats',
+    'indicator',
     'figures',
     'shape',
 )
