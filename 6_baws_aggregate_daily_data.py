@@ -52,8 +52,7 @@ if __name__ == "__main__":
         raise SystemExit(f'No cyano_daymap tiffs found in {s.data_path}')
 
     # Annual aggregates (one tiff per year, used by scripts 7-8).
-    # WARNING! tiff files only handles integer data with values <=100.
-    # The benefit of tiff-files are the super compressed format
+    # raster_writer picks uint8/uint16 from the data range.
     for year in years:
         print(f"{year}")
         generator = generate_filepaths(s.data_path,
@@ -65,15 +64,14 @@ if __name__ == "__main__":
             file_name=f'aggregation_{year}.tiff'
         )
 
-    # All-years aggregate (text matrix, used by plot script 0_1). Always
+    # All-years aggregate (GeoTIFF, used by plot script 0_1). Always
     # built from every season on disk, regardless of BAWS_YEARS.
     generator = generate_filepaths(s.data_path, pattern='cyano_daymap',
                                    endswith='.tiff')
     aggregation = raster_aggregation(generator, only_surface=False)
     s.export_data(
         data=aggregation,
-        file_name=f'aggregation_{all_years[0]}-{all_years[-1]}.txt',
-        writer='text'
+        file_name=f'aggregation_{all_years[0]}-{all_years[-1]}.tiff'
     )
 
         # # Monthly aggregate
