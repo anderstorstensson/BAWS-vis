@@ -61,7 +61,7 @@ class PlotMap:
                  clear_fig=False,
                  p_color=False):
 
-        self.color_map = cmap or plt.cm.jet
+        self.color_map = cmap or plt.cm.viridis #plt.cm.jet viridis_r = reversed version of colors
         self.data = data_mat
         self.mask = mask
 
@@ -273,7 +273,7 @@ class PlotWhiteMap:
                  fig_title=False
                  ):
 
-        self.color_map = cmap or plt.cm.jet
+        self.color_map = cmap or plt.cm.viridis # viridis_r = reversed version of colors
         self.data = data_mat
         self.lats = lat_mat
         self.lons = lon_mat
@@ -452,7 +452,7 @@ class PlotIceMap:
                  save_dir='',
                  clear_fig=False,
                  p_color=False):
-        self.color_map = cmap or plt.cm.jet
+        self.color_map = cmap or plt.cm.viridis # viridis_r = reversed version of colors
         self.data = data_mat
         self.lats = lat_mat
         self.lons = lon_mat
