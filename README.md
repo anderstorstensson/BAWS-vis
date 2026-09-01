@@ -13,15 +13,9 @@ TODO (incomplete):
 ## Setup
 The project uses [uv](https://docs.astral.sh/uv/) for the Python environment and needs Python 3.11 or 3.12.
 
-Linux/macOS:
 ```bash
-git clone <repository-url> && cd BAWS-vis
-uv sync
-```
-
-Windows (PowerShell):
-```powershell
-git clone <repository-url>; cd BAWS-vis
+git clone https://github.com/anderstorstensson/BAWS-vis.git
+cd BAWS-vis
 uv sync
 ```
 
@@ -44,6 +38,7 @@ aggregates/       seasonal aggregation rasters and annual shapefiles (scripts 6 
 stats/            json and xlsx statistics (scripts 8 to 16)
 figures/          png output of the figure scripts
 shape/            static inputs, see below
+indicator/        indicator .txt output
 ```
 
 Two static inputs go in `shape/`. They are not part of the repository.
