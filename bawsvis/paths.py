@@ -22,10 +22,11 @@ Standard stage directories under the data root:
     stats/            scripts 8-15 output; json/xlsx statistics
     indicator/        script 18 output; indicator text series (year;value)
     figures/          plotting output (0_1-0_3, box plots)
-    shape/            static user-provided inputs (not generated, not in
-                      git): the SVAR sea-basin shapefile used by scripts
-                      14 and 17 (Havsomr_SHARK_mod_SVAR2022_v1.*, the
-                      SHARK-modified SVAR2022 basins with BASIN_NR)
+    shape/            static inputs (not in git): the HELCOM sub-basin
+                      shapefile used by scripts 14 and 17
+                      (HELCOM_subbasins.*, downloaded from ICES on first
+                      use, see bawsvis/helcom_basins.py) and the GSHHS
+                      coastline for the map figure (user-provided)
 """
 import os
 from pathlib import Path

@@ -27,7 +27,7 @@ Bloom = class 2 (subsurface) or 3 (surface) touching the basin that day.
 import numpy as np
 import pandas as pd
 
-from bawsvis.basins import BASIN_NAMES, basin_key
+from bawsvis.basins import BASIN_NAMES, basin_key, basin_nr_from_key
 from bawsvis.paths import data_dir
 from bawsvis.utils import discover_years
 
@@ -35,7 +35,7 @@ BLOOM_CLASSES = (2, 3)
 
 
 def read_year_table(stats_dir, year):
-    """Basin x date table for one year, BASIN_NR_<n> first, dates sorted."""
+    """Basin x date table for one year, HELCOM_ID (SEA-0nn) first, dates sorted."""
     df = pd.read_excel(stats_dir / f'area_season_bloom_{year}_incl_cloud.xlsx')
     date_cols = sorted(c for c in df.columns if c != 'BASIN')
     basins = pd.DataFrame({'BASIN': [basin_key(b) for b in df['BASIN']]})
@@ -80,7 +80,7 @@ def per_basin_table(stats_dir, years):
     df = pd.DataFrame(records)
     df['length_days'] = (df['end'] - df['start']).dt.days + 1
     df['basin_nr'] = df['basin'].map(
-        lambda b: int(b.split('_')[-1]) if b != 'All' else np.nan)
+        lambda b: basin_nr_from_key(b) if b != 'All' else np.nan)
     df['basin_name'] = df['basin_nr'].map(BASIN_NAMES).fillna('All')
     return df[['year', 'basin', 'basin_nr', 'basin_name', 'start', 'end',
                'length_days', 'bloom_days']]

@@ -46,8 +46,8 @@ figures/          png output of the figure scripts
 shape/            static inputs, see below
 ```
 
-Two static inputs go in `shape/`. They are not part of the repository.
-- `Havsomr_SHARK_mod_SVAR2022_v1.*`: the SVAR sea basins used by scripts 14 and 17. A SHARK-modified product: the SVAR 2022:1.1 coastal and offshore water bodies (Swedish waters, new Lantmäteriet hydrography) completed with the outer-Baltic basin parts so every BASIN_NR basin covers the whole Baltic. SVAR2022 itself stops at the territorial sea limit and has no havsområden product, so this file is not directly downloadable from SMHI open data.
+Two static inputs live in `shape/`. They are not part of the repository.
+- `HELCOM_subbasins.*`: the 17 HELCOM sub-basins of the Baltic Sea (level-2 assessment units of the HELCOM Monitoring and Assessment Strategy, 2013), used by scripts 14 and 17. Downloaded automatically the first time either script runs, from the ICES ArcGIS REST service behind the [ICES/HELCOM record](https://gis.ices.dk/geonetwork/srv/api/records/225df9db-bfdf-4388-8ccb-fa4b99053a36), reprojected to SWEREF99 TM, topologically repaired and written as a shapefile with `HELCOM_ID` (SEA-001 to SEA-017), `BASIN_NR` (the number in the id), `NAME` and `AREA_KM2` (`bawsvis/helcom_basins.py`). Data can be used freely given that HELCOM is cited as the source. Delete the files to force a fresh download. The basins used are listed in `bawsvis/basins.py`, with Swedish names for the figures and the delivery files.
 - `GSHHS_h_L1.*`: the GSHHS high resolution coastline used by the map figure. Take it from `GSHHS_shp/h/` in the gshhg-shp archive at https://www.soest.hawaii.edu/pwessel/gshhg/.
 
 ## Running the pipeline
@@ -103,7 +103,7 @@ This writes `figures/diagram_2024.png` and `figures/basin_timeline_2024.png`. Fi
 ## Bloom indicator (steps 17, 18 and figure 0_5)
 A threshold-based indicator of bloom extent, start and length, per sea basin and for all basins pooled, intended for a climate indicator. It is computed from the daily 1 km class rasters rather than from the first/last day a bloom polygon touched a basin, so single pixels and single clear days do not set the dates.
 
-- Step 17 (`17_baws_basin_daily_areas.py`) counts cloud, subsurface and surface pixels per SVAR basin and day inside the BAWS valid area (`raster_landmask_baws1000_sweref99tm.tiff`, 352 682 km2) and writes `stats/basin_daily_areas_<year>.csv`. The basin label raster is cached as `stats/basin_labels_baws1000.tiff`; delete it if the basin shapefile changes.
+- Step 17 (`17_baws_basin_daily_areas.py`) counts cloud, subsurface and surface pixels per HELCOM sub-basin and day inside the BAWS valid area (`raster_landmask_baws1000_sweref99tm.tiff`, 352 682 km2) and writes `stats/basin_daily_areas_<year>.csv`, with `basin_nr` the HELCOM sub-basin number (SEA-0nn). The basin label raster is cached as `stats/basin_labels_helcom_baws1000.tiff`; delete it if the basin shapefile changes.
 - Step 18 (`18_baws_bloom_indicator.py`) applies `bawsvis/indicator.py` and writes `stats/bloom_indicator_<first>-<last>.xlsx` (sheets `all_basins`, `per_basin`, `method`), the same table as csv, and the `indicator/data_cyanoblomning_JJA_<basin>_<parameter>.txt` delivery series.
 
 ### Updating the indicator after a season
@@ -116,7 +116,7 @@ uv run python run_pipeline.py --indicator --years 2026
 `--indicator` runs steps 1, 2 and 2.1 (daymaps to landmasked daily tiffs) for the selected seasons, step 17 (per-basin daily areas) and step 18, which always recomputes the indicator from every season on disk. Weekly composites, the statistics files and the figures are left untouched; run the full pipeline when those need the new season too. A season whose window has not yet passed (plus a grace week) is flagged preliminary and kept out of the text series until a later run finds it complete.
 
 Method (parameters in `bawsvis/indicator.py`):
-- Daily FCA = bloom area / cloud-free observed area in the basin. A day is unusable for a basin if less than 20 % of the basin was observed. "All basins" sums the areas of the twelve basins (320 819 km2) before the ratio is taken, so it is the same quantity at another aggregation level. Kattegat, Norra Kvarken and Skärgårdshavet (SVAR 16, 2, 5) are inside the BAWS area but not among the twelve basins and are therefore not part of the pooled value.
+- Daily FCA = bloom area / cloud-free observed area in the basin. A day is unusable for a basin if less than 20 % of the basin was observed. "All basins" sums the areas of the 14 basins in `bawsvis/basins.py` (324 988 km2) before the ratio is taken, so it is the same quantity at another aggregation level. Kattegat and The Quark (SEA-001, SEA-016) are inside the BAWS area but not among the 14 basins and are therefore not part of the pooled value; Bothnian Bay (SEA-017) is outside the BAWS area. Compared with the SVAR basins used before, the Archipelago Sea is now part of Ålands hav, Bälthavet is split into Stora Bält, Kielbukten and Mecklenburgbukten, and Gdanskbukten is much smaller (most of the former SVAR basin belongs to the HELCOM Eastern Gotland Basin).
 - Season window is fixed to 1 June to 31 August.
 - Start and end are the first and last day the 7-day centred running mean of FCA is at least 5 % for at least 3 consecutive days. `span_days` is end to start inclusive, `bloom_days` the number of days the smoothed FCA is at least 5 % (can exceed the span when short runs occur outside the persistent period).
 - Extent is `mean_fca`, the mean daily FCA over the window (unobserved days excluded), with `mean_bloom_km2` and `peak_fca` / `peak_date` as supporting values.
