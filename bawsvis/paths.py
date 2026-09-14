@@ -24,7 +24,7 @@ Standard stage directories under the data root:
     figures/          plotting output (0_1-0_3, box plots)
     shape/            static inputs (not in git): the HELCOM sub-basin
                       shapefile used by scripts 14 and 17
-                      (HELCOM_subbasins.*, downloaded from ICES on first
+                      (HELCOM_subbasins.*, downloaded from HELCOM on first
                       use, see bawsvis/helcom_basins.py) and the GSHHS
                       coastline for the map figure (user-provided)
 """
