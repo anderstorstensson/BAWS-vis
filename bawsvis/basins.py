@@ -23,12 +23,12 @@ BASIN_NAMES = {
     14: 'Ålands hav',                  # SEA-014 Åland Sea
     13: 'Finska viken',                # SEA-013 Gulf of Finland
     12: 'Norra Egentliga Östersjön',   # SEA-012 Northern Baltic Proper
-    10: 'Västra Gotlandshavet',        # SEA-010 Western Gotland Basin
-    9: 'Östra Gotlandshavet',          # SEA-009 Eastern Gotland Basin
+    10: 'Västra Gotlandsbassängen',    # SEA-010 Western Gotland Basin
+    9: 'Östra Gotlandsbassängen',      # SEA-009 Eastern Gotland Basin
     11: 'Rigabukten',                  # SEA-011 Gulf of Riga
     8: 'Gdanskbukten',                 # SEA-008 Gdansk Basin
-    7: 'Bornholmshavet',               # SEA-007 Bornholm Basin
-    6: 'Arkonahavet',                  # SEA-006 Arkona Basin
+    7: 'Bornholmsbassängen',           # SEA-007 Bornholm Basin
+    6: 'Arkonabassängen',              # SEA-006 Arkona Basin
     5: 'Mecklenburgbukten',            # SEA-005 Bay of Mecklenburg
     4: 'Kielbukten',                   # SEA-004 Kiel Bay
     2: 'Stora Bält',                   # SEA-002 Great Belt
