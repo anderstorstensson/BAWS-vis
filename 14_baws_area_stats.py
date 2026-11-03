@@ -40,30 +40,15 @@ def get_areas_index(areas, cyano_shp, value=None, not_index=None):
 
 
 if __name__ == "__main__":
+    from bawsvis.basins import BASIN_NAMES
+    from bawsvis.helcom_basins import read_basins
     from bawsvis.paths import data_dir
 
-    # "POLY_NAMN"
-    basin_shp = data_dir('shape') / 'Havsomr_SHARK_mod_SVAR2022_v1.shp'
-    if not basin_shp.exists():
-        raise SystemExit(
-            f'Missing SVAR basin shapefile: {basin_shp}\n'
-            'Copy Havsomr_SHARK_mod_SVAR2022_v1.* there '
-            '(SHARK-modified SVAR2022 sea basins, whole-Baltic '
-            'coverage with BASIN_NR; see README, Data directory).'
-        )
-    areas = gp.read_file(basin_shp, encoding='cp1252')
-    if areas.crs is None:
-        # The bundled SVAR shapefile ships without a .prj;
-        # it is natively SWEREF99 TM.
-        areas = areas.set_crs(epsg=3006)
-    areas = areas.to_crs(epsg=3006)
-    areas_geometries = areas[['BASIN_NR', 'geometry']]
-    areas = areas_geometries.dissolve(by='BASIN_NR', as_index=False)
-    # selected_basins = [f'BASIN_NR_{n}' for n in
-    #                    (3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)]
-    selected_basins = (3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
-    boolean_filter = areas['BASIN_NR'].isin(selected_basins)
-    areas = areas.loc[boolean_filter, :].reset_index(drop=True)
+    # HELCOM sub-basins (downloaded to shape/ on first use); BASIN_NR is
+    # the HELCOM sub-basin number, one polygon per basin in EPSG:3006.
+    selected_basins = tuple(BASIN_NAMES)
+    areas = read_basins(data_dir('shape'), basin_numbers=selected_basins)
+    areas = areas[['BASIN_NR', 'geometry']].copy()
     areas['area'] = areas['geometry'].apply(lambda geom: int(geom.area))
     areas['area_threshold'] = areas['area'].apply(lambda a: int(a * .8))
     from bawsvis.utils import discover_years

@@ -4,42 +4,29 @@
 """Daily cloud, subsurface and surface area per sea basin (km2).
 
 Zonal statistics of the daily 1 km class rasters (corrected_geoms) over
-the SVAR sea basins, restricted to the BAWS valid area
+the HELCOM sub-basins (bawsvis/helcom_basins.py, downloaded to shape/ on
+first use), restricted to the BAWS valid area
 (raster_landmask_baws1000_sweref99tm.tiff). Writes, per season,
 
   stats/basin_daily_areas_<year>.csv
       date, basin_nr, valid_km2, cloud_km2, subsurface_km2, surface_km2
 
-and caches the basin label raster as stats/basin_labels_baws1000.tiff.
+where basin_nr is the HELCOM sub-basin number (SEA-0nn), and caches the
+basin label raster as stats/basin_labels_helcom_baws1000.tiff.
 Respects BAWS_YEARS. Input to script 18 (bloom indicator).
 """
 import os
 
-import geopandas as gp
-import numpy as np
 import pandas as pd
 import rasterio as rio
 
 from bawsvis.basin_areas import rasterize_basins, daily_basin_areas
 from bawsvis.basins import BASIN_NAMES
+from bawsvis.helcom_basins import read_basins
 from bawsvis.paths import data_dir, repo_file
 from bawsvis.utils import discover_years, generate_filepaths
 
-LABEL_RASTER = 'basin_labels_baws1000.tiff'
-SVAR_SHAPEFILE = 'Havsomr_SHARK_mod_SVAR2022_v1.shp'
-
-
-def read_basins(shape_dir):
-    path = shape_dir / SVAR_SHAPEFILE
-    if not path.exists():
-        raise SystemExit(f'Missing SVAR basin shapefile: {path}; '
-                         'see README (Data directory).')
-    areas = gp.read_file(path, encoding='cp1252')
-    if areas.crs is None:
-        areas = areas.set_crs(epsg=3006)
-    areas = areas.to_crs(epsg=3006)[['BASIN_NR', 'geometry']]
-    areas = areas.dissolve(by='BASIN_NR', as_index=False)
-    return areas[areas['BASIN_NR'].isin(BASIN_NAMES)].reset_index(drop=True)
+LABEL_RASTER = 'basin_labels_helcom_baws1000.tiff'
 
 
 def basin_labels(mask_path, stats_dir):
@@ -50,8 +37,8 @@ def basin_labels(mask_path, stats_dir):
     if cached.exists():
         with rio.open(cached) as src:
             return src.read(1), mask, meta
-    labels = rasterize_basins(read_basins(data_dir('shape')),
-                              meta['transform'], mask.shape)
+    basins = read_basins(data_dir('shape'), basin_numbers=BASIN_NAMES)
+    labels = rasterize_basins(basins, meta['transform'], mask.shape)
     with rio.open(cached, 'w', **{**meta, 'compress': 'lzw'}) as dst:
         dst.write(labels, 1)
     print('wrote', cached)

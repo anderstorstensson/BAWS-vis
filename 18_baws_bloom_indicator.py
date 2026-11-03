@@ -14,7 +14,7 @@ fixed 1 Jun - 31 Aug window). Writes
   stats/bloom_indicator_<first>-<last>.csv   (per_basin + all, long)
   indicator/data_cyanoblomning_JJA_<basin>_<parameter>.txt
       one year;value line per year (LF, empty value when undefined),
-      basin 'sverige' for the pooled series, else the basin name;
+      basin 'haven_runt_sverige' for the pooled series, else the basin name;
       parameters: startdatum (day of year), blomningsdagar (days with
       smoothed FCA >= threshold), cyanoblomningens_langd (span_days,
       start to end), medelutbredning (mean FCA x basin sea area,
@@ -37,7 +37,7 @@ from bawsvis.paths import data_dir
 from bawsvis.utils import discover_years
 
 TEXT_PREFIX = 'data_cyanoblomning_JJA'
-POOLED_TEXT_BASIN = 'sverige'
+POOLED_TEXT_BASIN = 'haven_runt_sverige'
 
 METHOD = {
     'fca_threshold': ind.THRESHOLD,
