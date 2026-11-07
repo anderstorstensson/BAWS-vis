@@ -16,6 +16,11 @@ Kiel Bay and Bay of Mecklenburg together.
 
 Basin 3 (Öresund / The Sound) is included in the area tables (script 14)
 but left out of the report figure, as in the original box-plot script.
+
+The bloom indicator (scripts 18 and 0_5) leaves out Rigabukten (11) and
+the small south-western basins Stora Bält (2), Öresund (3), Kielbukten (4)
+and Mecklenburgbukten (5), both as their own series and from the pooled
+series.
 """
 
 BASIN_NAMES = {
@@ -36,6 +41,9 @@ BASIN_NAMES = {
 }
 
 PLOTTED_BASINS = tuple(n for n in BASIN_NAMES if n != 3)
+
+INDICATOR_EXCLUDED = (11, 2, 3, 4, 5)
+INDICATOR_BASINS = tuple(n for n in BASIN_NAMES if n not in INDICATOR_EXCLUDED)
 
 
 def helcom_id(basin_nr):
