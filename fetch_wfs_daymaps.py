@@ -126,10 +126,10 @@ def main():
     parser.add_argument("--years", nargs="+", required=True,
                         help="Years and/or ranges, e.g. 2023 or 2002-2005")
     parser.add_argument("--out", required=True, help="Output directory")
-    parser.add_argument("--season-start", default="05-20", type=parse_monthday,
-                        help="Season start as MM-DD (default 05-20)")
-    parser.add_argument("--season-end", default="09-30", type=parse_monthday,
-                        help="Season end as MM-DD (default 09-30)")
+    parser.add_argument("--season-start", default="05-01", type=parse_monthday,
+                        help="Season start as MM-DD (default 05-01)")
+    parser.add_argument("--season-end", default="10-31", type=parse_monthday,
+                        help="Season end as MM-DD (default 10-31)")
     parser.add_argument("--sleep", type=float, default=1.0,
                         help="Seconds to wait between days (default 1.0)")
     parser.add_argument("--timeout", type=float, default=120.0)
