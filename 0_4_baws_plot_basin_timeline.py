@@ -30,6 +30,10 @@ YEAR = None
 
 mapping_basin = {basin_key(n): BASIN_NAMES[n] for n in PLOTTED_BASINS}
 
+MONTHS_SV = {1: 'Januari', 2: 'Februari', 3: 'Mars', 4: 'April', 5: 'Maj',
+             6: 'Juni', 7: 'Juli', 8: 'Augusti', 9: 'September',
+             10: 'Oktober', 11: 'November', 12: 'December'}
+
 def change_height(ax, new_value):
     for patch in ax.patches:
         current_height = patch.get_height()
@@ -299,15 +303,25 @@ if __name__ == "__main__":
 
     # Pin the minor ticks to fixed positions so the labels can be replaced
     # (set_ticklabels without a FixedLocator triggers a UserWarning).
-    minor_ticks = ax.get_xticks(minor=True)
+    # Month name on the 15th, blank on the 5th and 25th; built from the tick
+    # dates so seasons that run into October (or start in May) still match.
+    # A month cut off before its 15th is named at its first visible tick.
+    x_lo, x_hi = ax.get_xlim()
+    minor_ticks = [t for t in ax.get_xticks(minor=True) if x_lo <= t <= x_hi]
     ax.set_xticks(minor_ticks, minor=True)
+    tick_dates = mdates.num2date(minor_ticks)
+    label_days = {}
+    for d in tick_dates:
+        if d.day == 15 or d.month not in label_days:
+            label_days[d.month] = d.day
     ax.set_xticklabels(
-        ['', 'Juni', '', '', 'Juli', '', '', 'Augusti', '', '', 'September', ''][:len(minor_ticks)],
+        [MONTHS_SV[d.month] if label_days[d.month] == d.day else ''
+         for d in tick_dates],
         minor=True,
     )
 
-    for i, l in enumerate(ax.get_xticklabels(minor=True)):
-        if i in (1, 4, 7, 10):
+    for l in ax.get_xticklabels(minor=True):
+        if l.get_text():
             l.set_y(1.05)
 
     plt.tight_layout()

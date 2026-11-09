@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 
 from bawsvis import indicator as ind
-from bawsvis.basins import PLOTTED_BASINS, BASIN_NAMES
+from bawsvis.basins import PLOTTED_BASINS, BASIN_NAMES, INDICATOR_BASINS
 from bawsvis.paths import data_dir
 
 HUE = '#1f5f8b'          # single series hue
@@ -171,9 +171,10 @@ def heatmap(ax, grid, title, fmt):
 
 
 def figure_per_basin(table, out):
-    basins = table[table['basin_nr'].isin([str(b) for b in PLOTTED_BASINS])]
+    shown = [b for b in PLOTTED_BASINS if b in INDICATOR_BASINS]
+    basins = table[table['basin_nr'].isin([str(b) for b in shown])]
     basins = basins.assign(basin_nr=basins['basin_nr'].astype(int))
-    order = [BASIN_NAMES[b] for b in PLOTTED_BASINS]
+    order = [BASIN_NAMES[b] for b in shown]
     fig, axes = plt.subplots(1, 3, figsize=(17, 7), constrained_layout=True)
     for ax, (column, title, _) in zip(axes, PANELS):
         grid = basins.pivot(index='basin_name', columns='year',

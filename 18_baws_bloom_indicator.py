@@ -3,7 +3,8 @@
 # License: MIT License (see LICENSE.txt or http://opensource.org/licenses/mit).
 """Bloom climate indicator: start, end, length, extent per basin and pooled.
 
-Reads every stats/basin_daily_areas_<year>.csv (script 17) and applies
+Reads every stats/basin_daily_areas_<year>.csv (script 17), keeps the
+basins in bawsvis.basins.INDICATOR_BASINS (see INDICATOR_EXCLUDED) and applies
 bawsvis.indicator (5 % FCA threshold, 3-day persistence, 7-day smoothing,
 fixed 1 Jun - 31 Aug window). Writes
 
@@ -14,14 +15,19 @@ fixed 1 Jun - 31 Aug window). Writes
   stats/bloom_indicator_<first>-<last>.csv   (per_basin + all, long)
   indicator/data_cyanoblomning_JJA_<basin>_<parameter>.txt
       one year;value line per year (LF, empty value when undefined),
-      basin 'haven_runt_sverige' for the pooled series, else the basin name;
+      basin 'haven runt sverige' for the pooled series (the sum over
+      INDICATOR_BASINS), else the basin name in lower case with å/ä/ö
+      as a/a/o and spaces kept;
       parameters: startdatum (day of year), blomningsdagar (days with
-      smoothed FCA >= threshold), cyanoblomningens_langd (span_days,
-      start to end), medelutbredning (mean FCA x basin sea area,
-      1000 km2), maxutbredning (peak smoothed FCA x basin sea area,
-      1000 km2; supporting series, coverage-sensitive) and
-      observerad_andel (percent of season days with a usable FCA
-      value, the basis of the quality flag)
+      smoothed FCA >= threshold) and medelutbredning (mean FCA x basin
+      sea area, 1000 km2). Each also gets a <parameter>procent file:
+      the season's data coverage, i.e. the percentage of window days
+      with at least MIN_OBSERVED_FRACTION of the basin cloud-free
+      (observed_fraction x 100, one decimal), so seasons likely biased
+      by clouds can be spotted. The other metrics (end, span, peak
+      extent, ...) are in the workbook and CSV only.
+      Earlier data_cyanoblomning_JJA_*.txt files in indicator/ are
+      deleted first, so the folder holds only the current series.
 
 A season whose window (plus a grace week) has not yet passed at run
 time is flagged 'preliminary': it is kept in the workbook and CSV but
@@ -32,12 +38,12 @@ Always reads all seasons on disk (ignores BAWS_YEARS).
 import pandas as pd
 
 from bawsvis import indicator as ind
-from bawsvis.basins import BASIN_NAMES
+from bawsvis.basins import BASIN_NAMES, INDICATOR_BASINS
 from bawsvis.paths import data_dir
 from bawsvis.utils import discover_years
 
 TEXT_PREFIX = 'data_cyanoblomning_JJA'
-POOLED_TEXT_BASIN = 'haven_runt_sverige'
+POOLED_TEXT_BASIN = 'haven runt sverige'
 
 METHOD = {
     'fca_threshold': ind.THRESHOLD,
@@ -56,7 +62,8 @@ METHOD = {
 def read_daily_areas(stats_dir, years):
     frames = [pd.read_csv(stats_dir / f'basin_daily_areas_{year}.csv',
                           parse_dates=['date']) for year in years]
-    return pd.concat(frames, ignore_index=True)
+    daily = pd.concat(frames, ignore_index=True)
+    return daily[daily['basin_nr'].isin(INDICATOR_BASINS)]
 
 
 def with_names(table):
@@ -68,10 +75,6 @@ def with_names(table):
 
 def day_of_year(value):
     return '' if pd.isna(value) else str(value.dayofyear)
-
-
-def span_days(row):
-    return '' if pd.isna(row['start']) else str(int(row['span_days']))
 
 
 def bloom_days(row):
@@ -87,26 +90,43 @@ def extent_1000km2(row, column):
 TEXT_PARAMETERS = {
     'startdatum': lambda row: day_of_year(row['start']),
     'blomningsdagar': bloom_days,
-    'cyanoblomningens_langd': span_days,
     'medelutbredning': lambda row: extent_1000km2(row, 'mean_fca'),
-    'maxutbredning': lambda row: extent_1000km2(row, 'peak_smoothed_fca'),
-    'observerad_andel': lambda row: str(round(row['observed_fraction'] * 100)),
 }
 
 
 def basin_token(name):
-    return name.lower().translate(str.maketrans('åäö', 'aao')).replace(' ', '_')
+    return name.lower().translate(str.maketrans('åäö', 'aao'))
+
+
+def coverage_percent(row):
+    return f"{row['observed_fraction'] * 100:.1f}"
+
+
+def write_series(path, rows, value):
+    lines = [f'{int(row["year"])};{value(row)}' for row in rows]
+    path.write_text('\n'.join(lines) + '\n', encoding='utf-8', newline='\n')
 
 
 def write_text_series(out_dir, token, rows):
+    """Each parameter file gets a <parameter>procent companion with the
+    season's data coverage (identical for the three parameters)."""
     for parameter, value in TEXT_PARAMETERS.items():
-        lines = [f'{int(row["year"])};{value(row)}' for row in rows]
-        path = out_dir / f'{TEXT_PREFIX}_{token}_{parameter}.txt'
-        path.write_text('\n'.join(lines) + '\n', encoding='utf-8',
-                        newline='\n')
+        stem = f'{TEXT_PREFIX}_{token}_{parameter}'
+        write_series(out_dir / f'{stem}.txt', rows, value)
+        write_series(out_dir / f'{stem}procent.txt', rows, coverage_percent)
+
+
+def remove_old_text_files(out_dir):
+    """Delete earlier text series, so renamed or dropped basins leave no
+    stale files behind. Only files with TEXT_PREFIX are touched."""
+    old = sorted(out_dir.glob(f'{TEXT_PREFIX}_*.txt'))
+    for path in old:
+        path.unlink()
+    print('removed', len(old), 'earlier text series from', out_dir)
 
 
 def write_text_files(table, out_dir):
+    remove_old_text_files(out_dir)
     preliminary = table['quality'] == 'preliminary'
     if preliminary.any():
         years = sorted(table.loc[preliminary, 'year'].unique())
@@ -118,8 +138,8 @@ def write_text_files(table, out_dir):
             else basin_token(basin)
         rows = group.sort_values('year').to_dict('records')
         write_text_series(out_dir, token, rows)
-    print('wrote', len(table['basin_name'].unique()) * len(TEXT_PARAMETERS),
-          'text series in', out_dir)
+    print('wrote', len(table['basin_name'].unique()) * len(TEXT_PARAMETERS)
+          * 2, 'text series in', out_dir)
 
 
 def main():
