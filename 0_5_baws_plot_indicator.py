@@ -24,6 +24,10 @@ from bawsvis import indicator as ind
 from bawsvis.basins import PLOTTED_BASINS, BASIN_NAMES, INDICATOR_BASINS
 from bawsvis.paths import data_dir
 
+# '%-d' (day without leading zero) is not supported by strftime on Windows
+DAY_MONTH = plt.FuncFormatter(
+    lambda x, _: f'{mdates.num2date(x).day} {mdates.num2date(x):%b}')
+
 HUE = '#1f5f8b'          # single series hue
 HUE_LIGHT = '#9cc3dc'
 INK = '#333333'
@@ -70,7 +74,7 @@ def plot_span(ax, pooled):
                width=0.7, color=HUE if hatch is None else 'white',
                edgecolor=HUE, hatch=hatch, linewidth=1)
     ax.yaxis.set_major_locator(mdates.MonthLocator())
-    ax.yaxis.set_major_formatter(mdates.DateFormatter('%-d %b'))
+    ax.yaxis.set_major_formatter(DAY_MONTH)
     ax.set_ylim(mdates.date2num(pd.Timestamp(DUMMY_YEAR, *ind.SEASON_START)),
                 mdates.date2num(pd.Timestamp(DUMMY_YEAR, *ind.SEASON_END)))
     style_axis(ax, '')
@@ -127,7 +131,7 @@ def plot_start_bars(ax, pooled):
     quality_bars(ax, pooled, day_of_season(pooled['start']) - floor,
                  bottom=floor)
     ax.yaxis.set_major_locator(mdates.MonthLocator())
-    ax.yaxis.set_major_formatter(mdates.DateFormatter('%-d %b'))
+    ax.yaxis.set_major_formatter(DAY_MONTH)
     ax.set_ylim(floor, mdates.date2num(pd.Timestamp(DUMMY_YEAR, 9, 1)))
     style_axis(ax, '')
     ax.set_title('Startdatum', loc='left', fontsize=11, color=INK)
